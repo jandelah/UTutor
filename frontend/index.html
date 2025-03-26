@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="MentorTech UTSJR - Platform for student mentorship" />
+    <title>MentorTech UTSJR</title>
+    <script>
+        // Dynamically find and load CSS and JS files
+        fetch('./').then(response => response.text()).then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Find CSS files
+            const cssLinks = Array.from(doc.querySelectorAll('a')).filter(a => 
+                a.href.includes('/assets/') && a.href.endsWith('.css')
+            );
+            
+            // Find JS files
+            const jsLinks = Array.from(doc.querySelectorAll('a')).filter(a => 
+                a.href.includes('/assets/') && a.href.endsWith('.js')
+            );
+            
+            // Add CSS to page
+            cssLinks.forEach(link => {
+                const path = './assets/' + link.href.split('/assets/')[1];
+                const linkEl = document.createElement('link');
+                linkEl.rel = 'stylesheet';
+                linkEl.href = path;
+                document.head.appendChild(linkEl);
+            });
+            
+            // Add JS to page
+            jsLinks.forEach(link => {
+                const path = './assets/' + link.href.split('/assets/')[1];
+                const scriptEl = document.createElement('script');
+                scriptEl.type = 'module';
+                scriptEl.src = path;
+                document.body.appendChild(scriptEl);
+            });
+        }).catch(err => {
+            document.body.innerHTML = '<h1>Error loading application</h1><p>Please rebuild and redeploy the application.</p>';
+            console.error(err);
+        });
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+    <noscript>You need to enable JavaScript to run this application.</noscript>
+</body>
+</html>
