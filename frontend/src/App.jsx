@@ -1,5 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Layout from './components/common/Layout';
+import ProtectedRoute from './components/common/ProtectedRoute';
+import { AuthProvider, useAuth } from './AuthContext.jsx';
 
 // Páginas autenticadas
 import Dashboard from './pages/Dashboard';
@@ -16,19 +18,7 @@ import Register from './pages/Register';
 import About from './pages/About';
 import NotFound from './pages/NotFound';
 
-// Mock de autenticación (reemplazar con contexto real)
-const isAuthenticated = false;
-
-// Componente para rutas protegidas
-const ProtectedRoute = ({ children }) => {
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return children;
-};
-
-function App() {
+function AppRoutes() {
   return (
     <Routes>
       {/* Rutas públicas */}
@@ -90,6 +80,14 @@ function App() {
       {/* Ruta 404 */}
       <Route path="*" element={<Layout><NotFound /></Layout>} />
     </Routes>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 
