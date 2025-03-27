@@ -1,4 +1,4 @@
-pedienteimport { useState } from 'react';
+import { useState } from 'react';
 import { 
   Container, Paper, Box, Typography, Stepper, Step, 
   StepLabel, Button, TextField, MenuItem, FormControl, 
@@ -46,7 +46,7 @@ const Register = () => {
       semester: Yup.number()
         .required('Cuatrimestre requerido')
         .min(1, 'El cuatrimestre debe ser al menos 1')
-        .max(10, 'El cuatrimestre máximo es 11'),
+        .max(10, 'El cuatrimestre máximo es 10'),
     }),
     
     // Paso 3: Preferencias de Mentoría
