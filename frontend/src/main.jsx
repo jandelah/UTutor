@@ -8,11 +8,11 @@ import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <HashRouter>
+    <HashRouter>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
         <App />
-      </HashRouter>
-    </ThemeProvider>
+      </ThemeProvider>
+    </HashRouter>
   </React.StrictMode>
 );
