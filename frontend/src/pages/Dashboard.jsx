@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Grid, Typography, Box } from '@mui/material';
+import { Container, Grid, Typography, Box, Paper } from '@mui/material';
 import { 
   Group, School, CalendarMonth, MenuBook,
   TrendingUp, Assessment, History
@@ -13,8 +13,10 @@ import SubjectDistribution from '../components/dashboard/SubjectDistribution';
 import UpcomingSessions from '../components/dashboard/UpcomingSessions';
 import { getDashboardStats } from '../services/api/dashboardService';
 import { getUpcomingSessions } from '../services/api/mentorshipService';
+import { useAuth } from '../AuthContext.jsx';
 
 const Dashboard = () => {
+  const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [upcomingSessions, setUpcomingSessions] = useState([]);
@@ -47,7 +49,7 @@ const Dashboard = () => {
   return (
     <Container maxWidth="lg">
       <PageHeader 
-        title="Dashboard" 
+        title={`Bienvenido, ${currentUser?.name.split(' ')[0]}`}
         subtitle="Visualiza el progreso y estado de tus mentorías"
       />
       
@@ -112,8 +114,21 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Recursos Populares
             </Typography>
-            
-            {/* Aquí iría un componente para mostrar recursos populares */}
+            <Grid container spacing={2}>
+              {stats.recentResources.map((resource, index) => (
+                <Grid item xs={12} md={4} key={index}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <MenuBook color="primary" sx={{ mr: 1 }} />
+                    <Box>
+                      <Typography variant="body1">{resource.title}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {resource.downloads} descargas
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
           </Paper>
         </Grid>
       </Grid>
