@@ -1,4 +1,4 @@
-import { useState } from 'react';
+pedienteimport { useState } from 'react';
 import { 
   Container, Paper, Box, Typography, Stepper, Step, 
   StepLabel, Button, TextField, MenuItem, FormControl, 
@@ -41,12 +41,12 @@ const Register = () => {
     
     // Paso 2: Detalles Académicos
     Yup.object({
-      studentId: Yup.string().required('Matrícula requerida'),
+      studentId: Yup.string().required('Expediente requerido'),
       career: Yup.string().required('Carrera requerida'),
       semester: Yup.number()
-        .required('Semestre requerido')
-        .min(1, 'El semestre debe ser al menos 1')
-        .max(10, 'El semestre máximo es 10'),
+        .required('Cuatrimestre requerido')
+        .min(1, 'El cuatrimestre debe ser al menos 1')
+        .max(10, 'El cuatrimestre máximo es 11'),
     }),
     
     // Paso 3: Preferencias de Mentoría
@@ -286,7 +286,7 @@ const Register = () => {
               fullWidth
               id="studentId"
               name="studentId"
-              label="Matrícula"
+              label="Expediente"
               variant="outlined"
               margin="normal"
               value={formik.values.studentId}
@@ -321,7 +321,7 @@ const Register = () => {
               fullWidth
               id="semester"
               name="semester"
-              label="Semestre"
+              label="Cuatrimestre"
               type="number"
               variant="outlined"
               margin="normal"
