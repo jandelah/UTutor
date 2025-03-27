@@ -9,15 +9,18 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate, Link } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
+import { useAuth } from '../AuthContext.jsx';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [registerError, setRegisterError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const steps = ['Información Personal', 'Detalles Académicos', 'Preferencias de Mentoría'];
   
-  // Esquemas de validación para cada paso
+  // Esquemas de validación para cada paso (simplificados para facilitar el registro de demostración)
   const validationSchemas = [
     // Paso 1: Información Personal
     Yup.object({
@@ -25,10 +28,9 @@ const Register = () => {
       lastName: Yup.string().required('Apellido requerido'),
       email: Yup.string()
         .email('Correo electrónico inválido')
-        .required('Correo electrónico requerido')
-        .matches(/@utsjr\.edu\.mx$/, 'Debe ser un correo institucional de UTSJR'),
+        .required('Correo electrónico requerido'),
       password: Yup.string()
-        .min(8, 'La contraseña debe tener al menos 8 caracteres')
+        .min(4, 'La contraseña debe tener al menos 4 caracteres')
         .required('Contraseña requerida'),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Las contraseñas deben coincidir')
@@ -42,28 +44,26 @@ const Register = () => {
       studentId: Yup.string().required('Matrícula requerida'),
       career: Yup.string().required('Carrera requerida'),
       semester: Yup.number()
+        .required('Semestre requerido')
         .min(1, 'El semestre debe ser al menos 1')
-        .max(10, 'El semestre máximo es 10')
-        .required('Semestre requerido'),
+        .max(10, 'El semestre máximo es 10'),
     }),
     
     // Paso 3: Preferencias de Mentoría
     Yup.object({
       role: Yup.string().required('Selecciona un rol'),
-      interests: Yup.array().when('role', {
-        is: 'MENTEE',
-        then: Yup.array()
-          .min(1, 'Selecciona al menos un área de interés')
-          .required('Áreas de interés requeridas'),
-        otherwise: Yup.array()
-      }),
-      expertise: Yup.array().when('role', {
-        is: 'MENTOR',
-        then: Yup.array()
-          .min(1, 'Selecciona al menos un área de expertise')
-          .required('Áreas de expertise requeridas'),
-        otherwise: Yup.array()
-      })
+      interests: Yup.array()
+        .when('role', {
+          is: 'MENTEE',
+          then: () => Yup.array().min(1, 'Selecciona al menos un área de interés'),
+          otherwise: () => Yup.array()
+        }),
+      expertise: Yup.array()
+        .when('role', {
+          is: 'MENTOR',
+          then: () => Yup.array().min(1, 'Selecciona al menos un área de expertise'),
+          otherwise: () => Yup.array()
+        })
     })
   ];
   
@@ -88,30 +88,47 @@ const Register = () => {
       expertise: []
     },
     validationSchema: validationSchemas[activeStep],
-    onSubmit: (values) => {
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: async (values) => {
       if (activeStep < steps.length - 1) {
         handleNext();
       } else {
-        // Enviar datos de registro a API
-        console.log('Datos de registro:', values);
-        
-        // Simular envío exitoso
-        setTimeout(() => {
-          navigate('/login');
-        }, 1000);
+        try {
+          setIsSubmitting(true);
+          await register(values);
+          navigate('/dashboard');
+        } catch (error) {
+          setRegisterError(error.message);
+        } finally {
+          setIsSubmitting(false);
+        }
       }
     }
   });
   
   const handleNext = () => {
-    if (formik.dirty && !formik.isValid) {
-      // Activar validación para mostrar errores
-      formik.validateForm().then(() => {
-        // No avanzar si hay errores
-        return;
-      });
-    } else {
+    const currentSchema = validationSchemas[activeStep];
+    
+    // Validate current step fields
+    try {
+      currentSchema.validateSync(formik.values, { abortEarly: false });
       setActiveStep((prevStep) => prevStep + 1);
+    } catch (err) {
+      // Validate and show errors
+      const errors = {};
+      if (err.inner) {
+        err.inner.forEach((e) => {
+          errors[e.path] = e.message;
+        });
+      }
+      formik.setErrors(errors);
+      formik.setTouched(
+        Object.keys(errors).reduce((acc, key) => {
+          acc[key] = true;
+          return acc;
+        }, {})
+      );
     }
   };
   
@@ -464,7 +481,7 @@ const Register = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
             <Button
               variant="outlined"
-              disabled={activeStep === 0}
+              disabled={activeStep === 0 || isSubmitting}
               onClick={handleBack}
             >
               Atrás
@@ -473,11 +490,12 @@ const Register = () => {
             <Button
               variant="contained"
               color="primary"
-              type={activeStep === steps.length - 1 ? 'submit' : 'button'}
-              onClick={activeStep === steps.length - 1 ? undefined : handleNext}
-              disabled={formik.isSubmitting}
+              type="submit"
+              disabled={isSubmitting}
             >
-              {activeStep === steps.length - 1 ? 'Registrarme' : 'Siguiente'}
+              {activeStep === steps.length - 1 ? 
+                (isSubmitting ? 'Registrando...' : 'Registrarme') : 
+                'Siguiente'}
             </Button>
           </Box>
         </form>
