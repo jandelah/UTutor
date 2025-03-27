@@ -8,9 +8,11 @@ import { Visibility, VisibilityOff, Login as LoginIcon } from '@mui/icons-materi
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import PageHeader from '../components/common/PageHeader';
+import { useAuth } from '../AuthContext.jsx';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState(null);
   
@@ -28,23 +30,32 @@ const LoginPage = () => {
       password: ''
     },
     validationSchema,
-    onSubmit: (values) => {
-      // Simulación de login exitoso
-      console.log('Login attempt:', values);
-      
-      // Simular llamada a API
-      setTimeout(() => {
-        // Para simular error de login:
-        // setLoginError('Credenciales inválidas. Intenta de nuevo.');
-        
-        // Para simular login exitoso:
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        setLoginError(null);
+        await login(values.email, values.password);
         navigate('/dashboard');
-      }, 1000);
+      } catch (error) {
+        setLoginError('Credenciales inválidas. Intenta de nuevo.');
+      } finally {
+        setSubmitting(false);
+      }
     }
   });
   
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+  
+  // For demonstration, provide a way to login as existing user
+  const handleDemoLogin = async (email) => {
+    try {
+      setLoginError(null);
+      await login(email, 'password');
+      navigate('/dashboard');
+    } catch (error) {
+      setLoginError('Error en inicio de sesión de demostración');
+    }
   };
   
   return (
@@ -131,6 +142,29 @@ const LoginPage = () => {
               Regístrate aquí
             </Link>
           </Typography>
+        </Box>
+        
+        {/* Demo login options for easier testing */}
+        <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid #eee' }}>
+          <Typography variant="subtitle2" gutterBottom sx={{ textAlign: 'center' }}>
+            Para demostración:
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+            <Button 
+              size="small" 
+              variant="outlined"
+              onClick={() => handleDemoLogin('ana.garcia@utsjr.edu.mx')}
+            >
+              Login como Mentor
+            </Button>
+            <Button 
+              size="small" 
+              variant="outlined"
+              onClick={() => handleDemoLogin('laura.jimenez@utsjr.edu.mx')}
+            >
+              Login como Mentee
+            </Button>
+          </Box>
         </Box>
       </Paper>
     </Container>
