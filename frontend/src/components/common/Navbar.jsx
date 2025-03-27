@@ -9,6 +9,7 @@ import {
   CalendarMonth, Book, PersonAdd, Login, Logout, AccountCircle
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../AuthContext.jsx';
 
 const Navbar = () => {
   const theme = useTheme();
@@ -18,8 +19,8 @@ const Navbar = () => {
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
   
-  // Este estado tendría que venir de un contexto o servicio de autenticación
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Use the auth context instead of local state
+  const { currentUser, logout, isAuthenticated } = useAuth();
   
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -34,7 +35,7 @@ const Navbar = () => {
   };
   
   const handleLogout = () => {
-    setIsAuthenticated(false);
+    logout();
     handleClose();
     navigate('/login');
   };
@@ -62,7 +63,7 @@ const Navbar = () => {
             </IconButton>
           )}
           
-          <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
             MentorTech UTSJR
           </Typography>
           
@@ -112,8 +113,11 @@ const Navbar = () => {
                 edge="end"
                 color="inherit"
               >
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-                  AM
+                <Avatar 
+                  sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}
+                  src={currentUser?.avatar}
+                >
+                  {currentUser?.name?.charAt(0)}
                 </Avatar>
               </IconButton>
               <Menu
