@@ -18,7 +18,7 @@ const Register = () => {
   const [registerError, setRegisterError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const steps = ['Información Personal', 'Detalles Académicos', 'Preferencias de Mentoría'];
+  const steps = ['Información Personal', 'Detalles Académicos', 'Preferencias de Tutoría'];
   
   // Esquemas de validación para cada paso (simplificados para facilitar el registro de demostración)
   const validationSchemas = [
@@ -49,18 +49,18 @@ const Register = () => {
         .max(10, 'El cuatrimestre máximo es 10'),
     }),
     
-    // Paso 3: Preferencias de Mentoría
+    // Paso 3: Preferencias de Tutoría
     Yup.object({
       role: Yup.string().required('Selecciona un rol'),
       interests: Yup.array()
         .when('role', {
-          is: 'MENTEE',
+          is: 'TUTORADO',
           then: () => Yup.array().min(1, 'Selecciona al menos un área de interés'),
           otherwise: () => Yup.array()
         }),
       expertise: Yup.array()
         .when('role', {
-          is: 'MENTOR',
+          is: 'TUTOR',
           then: () => Yup.array().min(1, 'Selecciona al menos un área de expertise'),
           otherwise: () => Yup.array()
         })
@@ -83,7 +83,7 @@ const Register = () => {
       semester: '',
       
       // Paso 3
-      role: 'MENTEE',
+      role: 'TUTORADO',
       interests: [],
       expertise: []
     },
@@ -339,7 +339,7 @@ const Register = () => {
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Preferencias de Mentoría
+              Preferencias de Tutoría
             </Typography>
             
             <FormControl 
@@ -355,14 +355,14 @@ const Register = () => {
                 onBlur={formik.handleBlur}
               >
                 <FormControlLabel 
-                  value="MENTEE" 
+                  value="TUTORADO" 
                   control={<Radio />} 
-                  label="Como Mentee (recibir mentoría)" 
+                  label="Como Tutorado (recibir asesoría)" 
                 />
                 <FormControlLabel 
-                  value="MENTOR" 
+                  value="TUTOR" 
                   control={<Radio />} 
-                  label="Como Mentor (dar mentoría)" 
+                  label="Como Tutor (dar asesoría)" 
                 />
               </RadioGroup>
               {formik.touched.role && formik.errors.role && (
@@ -370,7 +370,7 @@ const Register = () => {
               )}
             </FormControl>
             
-            {formik.values.role === 'MENTEE' && (
+            {formik.values.role === 'TUTORADO' && (
               <FormControl 
                 fullWidth 
                 margin="normal"
@@ -408,7 +408,7 @@ const Register = () => {
               </FormControl>
             )}
             
-            {formik.values.role === 'MENTOR' && (
+            {formik.values.role === 'TUTOR' && (
               <FormControl 
                 fullWidth 
                 margin="normal"
@@ -457,7 +457,7 @@ const Register = () => {
     <Container maxWidth="md">
       <PageHeader 
         title="Registro" 
-        subtitle="Crea una cuenta en MentorTech UTSJR" 
+        subtitle="Crea una cuenta en UTutor" 
       />
       
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
