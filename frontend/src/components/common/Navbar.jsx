@@ -42,8 +42,8 @@ const Navbar = () => {
   
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Buscar Mentor', icon: <People />, path: '/search' },
-    { text: 'Mis Mentorías', icon: <School />, path: '/mentorships' },
+    { text: 'Buscar Tutor', icon: <People />, path: '/search' },
+    { text: 'Mis Tutorías', icon: <School />, path: '/tutoring' },
     { text: 'Sesiones', icon: <CalendarMonth />, path: '/sessions' },
     { text: 'Recursos', icon: <Book />, path: '/resources' },
   ];
@@ -64,7 +64,7 @@ const Navbar = () => {
           )}
           
           <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
-            MentorTech UTSJR
+            UTutor
           </Typography>
           
           {!isMobile && isAuthenticated && (
@@ -144,7 +144,7 @@ const Navbar = () => {
       >
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" component="div">
-            MentorTech UTSJR
+            UTutor
           </Typography>
         </Box>
         <Divider />
