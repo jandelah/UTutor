@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from './AuthContext.jsx';
 // Páginas autenticadas
 import Dashboard from './pages/Dashboard';
 import Search from './pages/Search';
-import Tutoring from './pages/Tutoring';
+import Mentorships from './pages/Mentorships';  // Mantenemos el nombre original del archivo
 import Sessions from './pages/Sessions';
 import Resources from './pages/Resources';
 import Profile from './pages/Profile';
@@ -48,7 +48,7 @@ function AppRoutes() {
         path="/tutoring" 
         element={
           <ProtectedRoute>
-            <Layout><Tutoring /></Layout>
+            <Layout><Mentorships /></Layout>
           </ProtectedRoute>
         } 
       />
