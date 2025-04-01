@@ -6,7 +6,7 @@ const Home = () => {
   const features = [
     {
       icon: <School fontSize="large" color="primary" />,
-      title: 'Mentoría Personalizada',
+      title: 'Asesoría Personalizada',
       description: 'Conecta con estudiantes avanzados que te ayudarán en materias específicas.'
     },
     {
@@ -17,12 +17,12 @@ const Home = () => {
     {
       icon: <CalendarMonth fontSize="large" color="primary" />,
       title: 'Sesiones Flexibles',
-      description: 'Programa sesiones de mentoría que se adapten a tu horario académico.'
+      description: 'Programa sesiones de tutoría que se adapten a tu horario académico.'
     },
     {
       icon: <TrendingUp fontSize="large" color="primary" />,
       title: 'Seguimiento de Progreso',
-      description: 'Visualiza tu avance y el impacto de las mentorías en tu desempeño.'
+      description: 'Visualiza tu avance y el impacto de las asesorías en tu desempeño.'
     }
   ];
   
@@ -45,7 +45,7 @@ const Home = () => {
                 Potencia tu desarrollo académico
               </Typography>
               <Typography variant="h5" paragraph>
-                Conecta con mentores de la UTSJR para mejorar tus habilidades técnicas y profesionales.
+                Conecta con tutores de la UTSJR para mejorar tus habilidades técnicas y profesionales.
               </Typography>
               <Box sx={{ mt: 4 }}>
                 <Button 
@@ -71,7 +71,7 @@ const Home = () => {
             <Grid item xs={12} md={5}>
               <Box 
                 component="img"
-                src="https://placehold.co/600x400/12a778/FFFFFF?text=MentorTech+UTSJR"
+                src="https://placehold.co/600x400/12a778/FFFFFF?text=UTutor"
                 alt="Estudiantes colaborando"
                 sx={{ 
                   width: '100%', 
@@ -95,7 +95,7 @@ const Home = () => {
           color="text.secondary"
           sx={{ mb: 6 }}
         >
-          Descubre todo lo que MentorTech UTSJR puede ofrecerte
+          Descubre todo lo que UTutor puede ofrecerte
         </Typography>
         
         <Grid container spacing={4}>
@@ -131,7 +131,7 @@ const Home = () => {
             color="text.secondary"
             sx={{ mb: 6 }}
           >
-            Tres simples pasos para comenzar tu experiencia de mentoría
+            Tres simples pasos para comenzar tu experiencia de tutoría
           </Typography>
           
           <Grid container spacing={4} alignItems="center">
@@ -167,7 +167,7 @@ const Home = () => {
                     2. Encuentra tu match
                   </Typography>
                   <Typography variant="body1">
-                    Busca mentores o mentees según tus necesidades académicas.
+                    Busca tutores o tutorados según tus necesidades académicas.
                   </Typography>
                 </CardContent>
               </Card>
@@ -186,7 +186,7 @@ const Home = () => {
                     3. Programa sesiones
                   </Typography>
                   <Typography variant="body1">
-                    Coordina y participa en sesiones de mentoría, compartiendo conocimientos.
+                    Coordina y participa en sesiones de tutoría, compartiendo conocimientos.
                   </Typography>
                 </CardContent>
               </Card>
@@ -210,7 +210,7 @@ const Home = () => {
             ¿Listo para comenzar?
           </Typography>
           <Typography variant="subtitle1" paragraph>
-            Únete a MentorTech UTSJR y forma parte de nuestra comunidad de aprendizaje colaborativo.
+            Únete a UTutor y forma parte de nuestra comunidad de aprendizaje colaborativo.
           </Typography>
           <Button 
             variant="contained" 
@@ -225,6 +225,10 @@ const Home = () => {
         </Box>
       </Container>
     </>
+  );
+};
+
+export default Home;
   );
 };
 
