@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from './AuthContext.jsx';
 // Páginas autenticadas
 import Dashboard from './pages/Dashboard';
 import Search from './pages/Search';
-import Mentorships from './pages/Mentorships';
+import Tutoring from './pages/Tutoring';
 import Sessions from './pages/Sessions';
 import Resources from './pages/Resources';
 import Profile from './pages/Profile';
@@ -45,10 +45,10 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/mentorships" 
+        path="/tutoring" 
         element={
           <ProtectedRoute>
-            <Layout><Mentorships /></Layout>
+            <Layout><Tutoring /></Layout>
           </ProtectedRoute>
         } 
       />
