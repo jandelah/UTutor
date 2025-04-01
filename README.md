@@ -1,14 +1,14 @@
 # UTutor
 
 ## Descripción
-MentorTech UTSJR es una plataforma de mentoría entre pares que conecta estudiantes avanzados (mentores) con estudiantes que buscan apoyo académico (mentees) en la Universidad Tecnológica de San Juan del Río.
+UTutor es una plataforma de asesoría académica entre pares que conecta estudiantes avanzados (tutores) con estudiantes que buscan apoyo académico (tutorados) en la Universidad Tecnológica de San Juan del Río.
 
-El proyecto se enfoca en fomentar la colaboración, el desarrollo de habilidades de liderazgo en mentores, y mejorar el rendimiento académico de los mentees.
+El proyecto se enfoca en fomentar la colaboración, el desarrollo de habilidades de liderazgo en tutores, y mejorar el rendimiento académico de los tutorados.
 
 ## Características principales
-- Sistema de perfiles para mentores y mentees
+- Sistema de perfiles para tutores y tutorados
 - Algoritmo de emparejamiento basado en áreas de interés/experiencia
-- Programación y seguimiento de sesiones de mentoría
+- Programación y seguimiento de sesiones de tutoría
 - Biblioteca de recursos educativos compartidos
 - Seguimiento de progreso y estadísticas
 - Sistema de evaluación bidireccional
@@ -40,3 +40,4 @@ El proyecto se enfoca en fomentar la colaboración, el desarrollo de habilidades
 cd frontend
 npm install
 npm run dev
+```
