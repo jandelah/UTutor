@@ -5,8 +5,8 @@ const About = () => {
   return (
     <Container maxWidth="lg">
       <PageHeader 
-        title="Acerca de MentorTech UTSJR" 
-        subtitle="Conoce más sobre nuestra plataforma de mentoría entre pares"
+        title="Acerca de UTutor" 
+        subtitle="Conoce más sobre nuestra plataforma de asesoría académica entre pares"
         breadcrumbs={[{ text: 'Acerca de', link: '/about' }]}
       />
       
@@ -15,8 +15,8 @@ const About = () => {
           Nuestra Misión
         </Typography>
         <Typography variant="body1" paragraph>
-          MentorTech UTSJR es una plataforma diseñada para fortalecer la comunidad universitaria 
-          a través de la mentoría entre pares. Buscamos facilitar la transferencia de conocimiento 
+          UTutor es una plataforma diseñada para fortalecer la comunidad universitaria 
+          a través de la asesoría académica entre pares. Buscamos facilitar la transferencia de conocimiento 
           entre estudiantes, reducir la brecha de aprendizaje y fomentar habilidades de liderazgo 
           y colaboración.
         </Typography>
@@ -31,7 +31,7 @@ const About = () => {
         <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 4, height: '100%' }}>
             <Typography variant="h5" component="h2" gutterBottom>
-              Beneficios para Mentees
+              Beneficios para Tutorados
             </Typography>
             <Box component="ul" sx={{ pl: 2 }}>
               <Typography component="li" variant="body1" paragraph>
@@ -56,7 +56,7 @@ const About = () => {
         <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 4, height: '100%' }}>
             <Typography variant="h5" component="h2" gutterBottom>
-              Beneficios para Mentores
+              Beneficios para Tutores
             </Typography>
             <Box component="ul" sx={{ pl: 2 }}>
               <Typography component="li" variant="body1" paragraph>
@@ -84,7 +84,7 @@ const About = () => {
           Nuestro Equipo
         </Typography>
         <Typography variant="body1" paragraph align="center" color="text.secondary">
-          MentorTech UTSJR es un proyecto desarrollado por estudiantes para estudiantes.
+          UTutor es un proyecto desarrollado por estudiantes para estudiantes.
         </Typography>
         
         {/* Aquí se podría añadir una galería con fotos del equipo */}
