@@ -7,7 +7,7 @@ export const MOCK_USERS = [
       avatar: 'https://i.pravatar.cc/150?img=1',
       career: 'Desarrollo de Software',
       semester: 6,
-      role: 'MENTOR'
+      role: 'TUTOR'
     },
     {
       id: 2,
@@ -16,7 +16,7 @@ export const MOCK_USERS = [
       avatar: 'https://i.pravatar.cc/150?img=2',
       career: 'Desarrollo de Software',
       semester: 7,
-      role: 'MENTOR'
+      role: 'TUTOR'
     },
     {
       id: 3,
@@ -25,7 +25,7 @@ export const MOCK_USERS = [
       avatar: 'https://i.pravatar.cc/150?img=3',
       career: 'Desarrollo de Software',
       semester: 2,
-      role: 'MENTEE'
+      role: 'TUTORADO'
     },
     {
       id: 4,
@@ -34,7 +34,7 @@ export const MOCK_USERS = [
       avatar: 'https://i.pravatar.cc/150?img=4',
       career: 'Desarrollo de Software',
       semester: 1,
-      role: 'MENTEE'
+      role: 'TUTORADO'
     },
     {
       id: 5,
@@ -43,11 +43,11 @@ export const MOCK_USERS = [
       avatar: 'https://i.pravatar.cc/150?img=5',
       career: 'Desarrollo de Software',
       semester: 8,
-      role: 'MENTOR'
+      role: 'TUTOR'
     }
   ];
   
-  // Mock de Perfiles de Mentores
+  // Mock de Perfiles de Tutores
   export const MOCK_MENTOR_PROFILES = [
     {
       id: 1,
@@ -104,7 +104,7 @@ export const MOCK_USERS = [
     }
   ];
   
-  // Mock de Perfiles de Mentees
+  // Mock de Perfiles de Tutorados
   export const MOCK_MENTEE_PROFILES = [
     {
       id: 1,
@@ -132,43 +132,43 @@ export const MOCK_USERS = [
     }
   ];
   
-  // Mock de Mentorías
+  // Mock de Tutorías
   export const MOCK_MENTORSHIPS = [
     {
       id: 1,
-      mentorId: 1,
-      menteeId: 1,
+      tutorId: 1,
+      tutoradoId: 1,
       status: 'ACTIVE',
       startDate: '2023-09-01',
       endDate: null,
       focusAreas: ['React', 'JavaScript', 'Frontend'],
       notes: 'Sesiones enfocadas en desarrollo frontend con React',
-      mentorRating: 5,
-      menteeRating: 4.5
+      tutorRating: 5,
+      tutoradoRating: 4.5
     },
     {
       id: 2,
-      mentorId: 2,
-      menteeId: 2,
+      tutorId: 2,
+      tutoradoId: 2,
       status: 'ACTIVE',
       startDate: '2023-08-15',
       endDate: null,
       focusAreas: ['Algoritmos', 'Lógica de Programación', 'Java'],
       notes: 'Reforzamiento de conceptos básicos de programación',
-      mentorRating: 4.8,
-      menteeRating: 4.7
+      tutorRating: 4.8,
+      tutoradoRating: 4.7
     },
     {
       id: 3,
-      mentorId: 3,
-      menteeId: 1,
+      tutorId: 3,
+      tutoradoId: 1,
       status: 'COMPLETE',
       startDate: '2023-05-10',
       endDate: '2023-07-20',
       focusAreas: ['Diseño UI', 'UX', 'Wireframing'],
-      notes: 'Mentoría en diseño de interfaces y experiencia de usuario.',
-      mentorRating: 4.9,
-      menteeRating: 5
+      notes: 'Tutoría en diseño de interfaces y experiencia de usuario.',
+      tutorRating: 4.9,
+      tutoradoRating: 5
     }
   ];
   
@@ -176,7 +176,7 @@ export const MOCK_USERS = [
   export const MOCK_SESSIONS = [
     {
       id: 1,
-      mentorshipId: 1,
+      tutoriaId: 1,
       title: 'Introducción a React Hooks',
       date: '2023-09-15',
       startTime: '15:00',
@@ -191,12 +191,12 @@ export const MOCK_USERS = [
       ],
       notes: 'Revisamos los hooks básicos y creamos algunos ejemplos.',
       feedback: {
-        mentor: {
+        tutor: {
           usefulness: 4,
           engagement: 5,
           comments: 'Muy buena participación y preguntas interesantes.'
         },
-        mentee: {
+        tutorado: {
           clarity: 5,
           usefulness: 5,
           comments: 'Explicación clara y ejemplos muy útiles.'
@@ -205,7 +205,7 @@ export const MOCK_USERS = [
     },
     {
       id: 2,
-      mentorshipId: 1,
+      tutoriaId: 1,
       title: 'Estado global con Context API',
       date: '2023-09-22',
       startTime: '15:00',
@@ -220,7 +220,7 @@ export const MOCK_USERS = [
     },
     {
       id: 3,
-      mentorshipId: 2,
+      tutoriaId: 2,
       title: 'Estructuras de Control en Java',
       date: '2023-09-18',
       startTime: '14:00',
@@ -234,12 +234,12 @@ export const MOCK_USERS = [
       ],
       notes: 'Revisamos diferentes estructuras de control con ejercicios prácticos.',
       feedback: {
-        mentor: {
+        tutor: {
           usefulness: 4,
           engagement: 3,
           comments: 'Buena sesión, aunque faltó un poco más de participación.'
         },
-        mentee: {
+        tutorado: {
           clarity: 5,
           usefulness: 4,
           comments: 'Me quedaron claros los conceptos. Necesito practicar más.'
@@ -248,7 +248,7 @@ export const MOCK_USERS = [
     },
     {
       id: 4,
-      mentorshipId: 2,
+      tutoriaId: 2,
       title: 'Arrays y Colecciones',
       date: '2023-09-25',
       startTime: '14:00',
@@ -332,11 +332,11 @@ export const MOCK_USERS = [
   
   // Mock de Estadísticas para Dashboard
   export const MOCK_DASHBOARD_STATS = {
-    activeMentorships: 15,
+    activeTutorias: 15,
     completedSessions: 87,
     upcomingSessions: 23,
-    averageMentorRating: 4.7,
-    mentorshipsBySubject: [
+    averageTutorRating: 4.7,
+    tutoriasBySubject: [
       { subject: 'Programación Web', count: 8 },
       { subject: 'Algoritmos', count: 5 },
       { subject: 'Bases de Datos', count: 4 },
@@ -353,7 +353,7 @@ export const MOCK_USERS = [
       { month: 'Ago', sessions: 24 },
       { month: 'Sep', sessions: 28 }
     ],
-    topMentors: [
+    topTutores: [
       { id: 5, name: 'Sofia Ramírez', sessions: 32, rating: 4.9 },
       { id: 1, name: 'Ana García', sessions: 24, rating: 4.8 },
       { id: 2, name: 'Carlos Mendoza', sessions: 18, rating: 4.6 }
