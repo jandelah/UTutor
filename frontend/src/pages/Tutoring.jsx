@@ -7,21 +7,20 @@ import {
 } from '@mui/material';
 import { 
   School, CalendarMonth, Chat, AccessTime, 
-  Add, MoreVert, Info, CheckCircleOutline, Event 
+  Add, MoreVert, Info, Check, Close
 } from '@mui/icons-material';
 import PageHeader from '../components/common/PageHeader';
-import { Link } from 'react-router-dom';
 
-const Tutoring = () => {
+const Mentorships = () => {
   const [tabValue, setTabValue] = useState(0);
-  const [selectedTutoria, setSelectedTutoria] = useState(null);
+  const [selectedMentorship, setSelectedMentorship] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  // Datos de ejemplo para tutorías
-  const tutorias = [
+  // Datos de ejemplo para mentorías
+  const mentorships = [
     {
       id: 1,
-      tutor: {
+      mentor: {
         id: 1,
         name: 'Ana García',
         avatar: 'https://i.pravatar.cc/150?img=1',
@@ -36,7 +35,7 @@ const Tutoring = () => {
     },
     {
       id: 2,
-      tutor: {
+      mentor: {
         id: 2,
         name: 'Carlos Mendoza',
         avatar: 'https://i.pravatar.cc/150?img=2',
@@ -51,7 +50,7 @@ const Tutoring = () => {
     },
     {
       id: 3,
-      tutor: {
+      mentor: {
         id: 5,
         name: 'Sofía Ramírez',
         avatar: 'https://i.pravatar.cc/150?img=5',
@@ -66,11 +65,11 @@ const Tutoring = () => {
     }
   ];
   
-  // Filtrar tutorías según el tab seleccionado
-  const filteredTutorias = tutorias.filter(tutoria => {
+  // Filtrar mentorías según el tab seleccionado
+  const filteredMentorships = mentorships.filter(mentorship => {
     if (tabValue === 0) return true; // Todas
-    if (tabValue === 1) return tutoria.status === 'ACTIVE'; // Activas
-    if (tabValue === 2) return tutoria.status === 'COMPLETED'; // Completadas
+    if (tabValue === 1) return mentorship.status === 'ACTIVE'; // Activas
+    if (tabValue === 2) return mentorship.status === 'COMPLETED'; // Completadas
     return false;
   });
   
@@ -80,8 +79,8 @@ const Tutoring = () => {
   };
   
   // Abrir diálogo de detalles
-  const handleOpenDialog = (tutoria) => {
-    setSelectedTutoria(tutoria);
+  const handleOpenDialog = (mentorship) => {
+    setSelectedMentorship(mentorship);
     setDialogOpen(true);
   };
   
@@ -113,9 +112,9 @@ const Tutoring = () => {
   return (
     <Container maxWidth="lg">
       <PageHeader 
-        title="Mis Tutorías" 
-        subtitle="Gestiona tus asesorías académicas activas y pasadas"
-        breadcrumbs={[{ text: 'Mis Tutorías', link: '/tutoring' }]}
+        title="Mis Mentorías" 
+        subtitle="Gestiona tus mentorías activas y pasadas"
+        breadcrumbs={[{ text: 'Mis Mentorías', link: '/mentorships' }]}
       />
       
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -129,7 +128,7 @@ const Tutoring = () => {
         
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6" component="div">
-            {filteredTutorias.length} tutorías encontradas
+            {filteredMentorships.length} mentorías encontradas
           </Typography>
           <Button
             variant="contained"
@@ -137,34 +136,34 @@ const Tutoring = () => {
             startIcon={<Add />}
             onClick={() => {}}
           >
-            Nueva Tutoría
+            Nueva Mentoría
           </Button>
         </Box>
         
         <Grid container spacing={3}>
-          {filteredTutorias.map(tutoria => (
-            <Grid item xs={12} md={6} key={tutoria.id}>
+          {filteredMentorships.map(mentorship => (
+            <Grid item xs={12} md={6} key={mentorship.id}>
               <Card elevation={2}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Avatar
-                        src={tutoria.tutor.avatar}
-                        alt={tutoria.tutor.name}
+                        src={mentorship.mentor.avatar}
+                        alt={mentorship.mentor.name}
                         sx={{ width: 50, height: 50, mr: 2 }}
                       />
                       <Box>
                         <Typography variant="h6" component="div">
-                          {tutoria.tutor.name}
+                          {mentorship.mentor.name}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Rating value={tutoria.tutor.rating} precision={0.1} size="small" readOnly />
+                          <Rating value={mentorship.mentor.rating} precision={0.1} size="small" readOnly />
                         </Box>
                       </Box>
                     </Box>
                     <Chip
-                      label={tutoria.status === 'ACTIVE' ? 'Activa' : 'Completada'}
-                      color={tutoria.status === 'ACTIVE' ? 'success' : 'default'}
+                      label={mentorship.status === 'ACTIVE' ? 'Activa' : 'Completada'}
+                      color={mentorship.status === 'ACTIVE' ? 'success' : 'default'}
                       size="small"
                     />
                   </Box>
@@ -172,16 +171,16 @@ const Tutoring = () => {
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" color="text.secondary">
                       <CalendarMonth fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                      Inicio: {formatDate(tutoria.startDate)}
+                      Inicio: {formatDate(mentorship.startDate)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       <School fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                      {tutoria.completedSessions} sesiones completadas
+                      {mentorship.completedSessions} sesiones completadas
                     </Typography>
-                    {tutoria.status === 'ACTIVE' && (
+                    {mentorship.status === 'ACTIVE' && (
                       <Typography variant="body2" color="text.secondary">
                         <AccessTime fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                        Próxima sesión: {formatNextSession(tutoria.nextSession)}
+                        Próxima sesión: {formatNextSession(mentorship.nextSession)}
                       </Typography>
                     )}
                   </Box>
@@ -190,7 +189,7 @@ const Tutoring = () => {
                     Áreas de enfoque
                   </Typography>
                   <Box>
-                    {tutoria.focusAreas.map((area, index) => (
+                    {mentorship.focusAreas.map((area, index) => (
                       <Chip
                         key={index}
                         label={area}
@@ -210,12 +209,12 @@ const Tutoring = () => {
                     size="small" 
                     color="primary"
                     startIcon={<Info />}
-                    onClick={() => handleOpenDialog(tutoria)}
+                    onClick={() => handleOpenDialog(mentorship)}
                   >
                     Detalles
                   </Button>
                   
-                  {tutoria.status === 'ACTIVE' && (
+                  {mentorship.status === 'ACTIVE' && (
                     <>
                       <Button 
                         size="small" 
@@ -244,10 +243,10 @@ const Tutoring = () => {
           ))}
         </Grid>
         
-        {filteredTutorias.length === 0 && (
+        {filteredMentorships.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 5 }}>
             <Typography variant="h6" color="text.secondary">
-              No se encontraron tutorías
+              No se encontraron mentorías
             </Typography>
             <Button 
               variant="contained" 
@@ -256,23 +255,23 @@ const Tutoring = () => {
               sx={{ mt: 2 }}
               onClick={() => {}}
             >
-              Iniciar Nueva Tutoría
+              Iniciar Nueva Mentoría
             </Button>
           </Box>
         )}
       </Paper>
       
-      {/* Diálogo de detalles de tutoría */}
+      {/* Diálogo de detalles de mentoría */}
       <Dialog
         open={dialogOpen}
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
       >
-        {selectedTutoria && (
+        {selectedMentorship && (
           <>
             <DialogTitle>
-              Detalles de Tutoría con {selectedTutoria.tutor.name}
+              Detalles de Mentoría con {selectedMentorship.mentor.name}
             </DialogTitle>
             <DialogContent dividers>
               <Grid container spacing={3}>
@@ -282,16 +281,16 @@ const Tutoring = () => {
                   </Typography>
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="body2">
-                      <strong>Estado:</strong> {selectedTutoria.status === 'ACTIVE' ? 'Activa' : 'Completada'}
+                      <strong>Estado:</strong> {selectedMentorship.status === 'ACTIVE' ? 'Activa' : 'Completada'}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Fecha de inicio:</strong> {formatDate(selectedTutoria.startDate)}
+                      <strong>Fecha de inicio:</strong> {formatDate(selectedMentorship.startDate)}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Sesiones completadas:</strong> {selectedTutoria.completedSessions}
+                      <strong>Sesiones completadas:</strong> {selectedMentorship.completedSessions}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Sesiones programadas:</strong> {selectedTutoria.upcomingSessions}
+                      <strong>Sesiones programadas:</strong> {selectedMentorship.upcomingSessions}
                     </Typography>
                   </Box>
                   
@@ -299,7 +298,7 @@ const Tutoring = () => {
                     Áreas de Enfoque
                   </Typography>
                   <Box sx={{ mb: 3 }}>
-                    {selectedTutoria.focusAreas.map((area, index) => (
+                    {selectedMentorship.focusAreas.map((area, index) => (
                       <Chip
                         key={index}
                         label={area}
@@ -313,34 +312,34 @@ const Tutoring = () => {
                 
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle1" gutterBottom>
-                    Información del Tutor
+                    Información del Mentor
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar
-                      src={selectedTutoria.tutor.avatar}
-                      alt={selectedTutoria.tutor.name}
+                      src={selectedMentorship.mentor.avatar}
+                      alt={selectedMentorship.mentor.name}
                       sx={{ width: 60, height: 60, mr: 2 }}
                     />
                     <Box>
                       <Typography variant="h6" component="div">
-                        {selectedTutoria.tutor.name}
+                        {selectedMentorship.mentor.name}
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Rating value={selectedTutoria.tutor.rating} precision={0.1} size="small" readOnly />
+                        <Rating value={selectedMentorship.mentor.rating} precision={0.1} size="small" readOnly />
                         <Typography variant="body2" sx={{ ml: 1 }}>
-                          ({selectedTutoria.tutor.rating})
+                          ({selectedMentorship.mentor.rating})
                         </Typography>
                       </Box>
                     </Box>
                   </Box>
                   
-                  {selectedTutoria.status === 'ACTIVE' && selectedTutoria.nextSession && (
+                  {selectedMentorship.status === 'ACTIVE' && selectedMentorship.nextSession && (
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="subtitle1" gutterBottom>
                         Próxima Sesión
                       </Typography>
                       <Typography variant="body2">
-                        {formatNextSession(selectedTutoria.nextSession)}
+                        {formatNextSession(selectedMentorship.nextSession)}
                       </Typography>
                       <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
                         <Button 
@@ -354,7 +353,7 @@ const Tutoring = () => {
                           variant="outlined" 
                           color="error" 
                           size="small"
-                          startIcon={<MoreVert />}
+                          startIcon={<Close />}
                         >
                           Cancelar
                         </Button>
@@ -372,14 +371,14 @@ const Tutoring = () => {
                     fullWidth
                     multiline
                     rows={4}
-                    placeholder="Añadir notas sobre esta tutoría..."
+                    placeholder="Añadir notas sobre esta mentoría..."
                     variant="outlined"
                   />
                 </Grid>
               </Grid>
             </DialogContent>
             <DialogActions>
-              {selectedTutoria.status === 'ACTIVE' ? (
+              {selectedMentorship.status === 'ACTIVE' ? (
                 <>
                   <Button 
                     onClick={handleCloseDialog} 
@@ -398,14 +397,14 @@ const Tutoring = () => {
                     variant="contained" 
                     color="error"
                   >
-                    Finalizar Tutoría
+                    Finalizar Mentoría
                   </Button>
                 </>
               ) : (
                 <Button 
                   onClick={handleCloseDialog} 
                   color="primary"
-                  startIcon={<CheckCircleOutline />}
+                  startIcon={<Check />}
                 >
                   Cerrar
                 </Button>
@@ -418,4 +417,4 @@ const Tutoring = () => {
   );
 };
 
-export default Tutoring;
+export default Mentorships;
