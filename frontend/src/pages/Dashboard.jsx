@@ -50,15 +50,15 @@ const Dashboard = () => {
     <Container maxWidth="lg">
       <PageHeader 
         title={`Bienvenido, ${currentUser?.name.split(' ')[0]}`}
-        subtitle="Visualiza el progreso y estado de tus mentorías"
+        subtitle="Visualiza el progreso y estado de tus tutorías"
       />
       
       <Grid container spacing={3}>
         {/* Tarjetas de estadísticas */}
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Mentorías Activas" 
-            value={stats.activeMentorships} 
+            title="Tutorías Activas" 
+            value={stats.activeTutorias} 
             icon={<Group />}
             color="primary"
           />
@@ -82,7 +82,7 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title="Calificación Promedio" 
-            value={stats.averageMentorRating.toFixed(1)} 
+            value={stats.averageTutorRating.toFixed(1)} 
             icon={<Assessment />}
             color="info"
           />
@@ -95,7 +95,7 @@ const Dashboard = () => {
         
         {/* Distribución por materia */}
         <Grid item xs={12} md={4}>
-          <SubjectDistribution data={stats.mentorshipsBySubject} />
+          <SubjectDistribution data={stats.tutoriasBySubject} />
         </Grid>
         
         {/* Próximas sesiones */}
@@ -103,9 +103,9 @@ const Dashboard = () => {
           <UpcomingSessions sessions={upcomingSessions.slice(0, 3)} />
         </Grid>
         
-        {/* Mentores destacados */}
+        {/* Tutores destacados */}
         <Grid item xs={12} md={4}>
-          <TopMentorsList mentors={stats.topMentors} />
+          <TopMentorsList mentors={stats.topTutores} />
         </Grid>
         
         {/* Sección de recursos recientes */}
