@@ -17,10 +17,10 @@ const Footer = () => {
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4}>
             <Typography variant="h6" gutterBottom>
-              MentorTech UTSJR
+              UTutor
             </Typography>
             <Typography variant="body2">
-              Plataforma de mentoría entre pares para estudiantes de la Universidad Tecnológica de San Juan del Río.
+              Plataforma de asesoría académica entre pares para estudiantes de la Universidad Tecnológica de San Juan del Río.
             </Typography>
           </Grid>
           
@@ -55,7 +55,7 @@ const Footer = () => {
         <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.2)' }} />
         
         <Typography variant="body2" align="center">
-          © {currentYear} MentorTech UTSJR. Todos los derechos reservados.
+          © {currentYear} UTutor. Todos los derechos reservados.
         </Typography>
       </Container>
     </Box>
