@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -11,6 +12,31 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Basic rate limiter implementation (inline for simplicity)
+const rateLimit = (maxRequests, timeWindow) => {
+  const requests = new Map();
+  
+  return (req, res, next) => {
+    const identifier = req.ip;
+    const now = Date.now();
+    const userRequests = requests.get(identifier) || [];
+    const recentRequests = userRequests.filter(
+      requestTime => requestTime > now - timeWindow
+    );
+    
+    if (recentRequests.length >= maxRequests) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many requests, please try again later'
+      });
+    }
+    
+    recentRequests.push(now);
+    requests.set(identifier, recentRequests);
+    next();
+  };
+};
 
 // Basic route to verify server is running
 app.get('/', (req, res) => {

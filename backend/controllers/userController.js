@@ -4,6 +4,8 @@ const { supabase } = require('../config/supabase');
 exports.register = async (req, res) => {
   try {
     const { email, password, name, career, semester, role } = req.body;
+    console.log('[DEBUG] Email:', email, 'Password:', password);
+    console.log('[DEBUG] Full request body:', req.body);
 
     // Register user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
