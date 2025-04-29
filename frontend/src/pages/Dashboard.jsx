@@ -58,7 +58,7 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title="Tutorías Activas" 
-            value={stats.activeTutorias} 
+            value={stats?.activeTutorias ?? 0}  
             icon={<Group />}
             color="primary"
           />
@@ -74,7 +74,7 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title="Próximas Sesiones" 
-            value={stats.upcomingSessions} 
+            value={stats?.upcomingSessions ?? 0}  
             icon={<CalendarMonth />}
             color="warning"
           />
@@ -100,7 +100,12 @@ const Dashboard = () => {
         
         {/* Próximas sesiones */}
         <Grid item xs={12} md={8}>
-          <UpcomingSessions sessions={upcomingSessions.slice(0, 3)} />
+          <UpcomingSessions 
+            sessions={Array.isArray(upcomingSessions) 
+              ? upcomingSessions.slice(0, 3) 
+              : [] 
+            } 
+            />  
         </Grid>
         
         {/* Tutores destacados */}

@@ -1,77 +1,70 @@
 // controllers/sessionController.js
 const { supabase } = require('../config/supabase');
 
+
 exports.getSessions = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { mentorship_id } = req.query;
+    const { status, mentorship_id } = req.query;
     
-    let query = supabase
-  .from('sessions')
-  .select(`
-    *,
-    mentorship:mentorship_id(
-      id,
-      tutor_id,
-      tutorado_id
-    )
-  `);
+    // Helper to apply common select+filter
+    const makeQuery = () => {
+      let q = supabase
+        .from('sessions')
+        .select(`
+          *,
+          mentorship:mentorship_id(
+            id,
+            tutor_id,
+            tutorado_id
+          )
+        `);
+      if (status) {
+        q = q.eq('status', status);
+      }
+      if (mentorship_id) {
+        q = q.eq('mentorship_id', mentorship_id);
+      }
+      return q;
+    };
 
-// Use separate filters instead of a complex OR condition
-if (userId) {
-  // First find sessions where user is the tutor
-  const tutorQuery = supabase
-    .from('sessions')
-    .select(`
-      *,
-      mentorship:mentorship_id(
-        id,
-        tutor_id,
-        tutorado_id
-      )
-    `)
-    .eq('mentorship.tutor_id', userId);
-  
-  // Then find sessions where user is the tutorado
-  const tutoradoQuery = supabase
-    .from('sessions')
-    .select(`
-      *,
-      mentorship:mentorship_id(
-        id,
-        tutor_id,
-        tutorado_id
-      )
-    `)
-    .eq('mentorship.tutorado_id', userId);
-  
-  // Execute both queries and combine the results
-  const [tutorResult, tutoradoResult] = await Promise.all([tutorQuery, tutoradoQuery]);
-  const combinedResults = [...(tutorResult.data || []), ...(tutoradoResult.data || [])];
-  
-  // Use the combined results
-  query = { data: combinedResults, error: tutorResult.error || tutoradoResult.error };
-}
-    
-    // Order by date
-    query = query.order('date', { ascending: true });
-    
-    const { data, error } = await query;
-    
+    let data, error;
+    // If we need to show only *this user’s* sessions, merge tutor + tutorado
+    if (userId) {
+      // Tutor’s sessions
+      const tutorRes = await makeQuery().eq('mentorship.tutor_id', userId);
+      // Tutorado’s sessions
+      const tutRes2 = await makeQuery().eq('mentorship.tutorado_id', userId);
+
+      error = tutorRes.error || tutRes2.error;
+      data = [
+        ...(tutorRes.data || []),
+        ...(tutRes2.data || [])
+      ];
+      // sort locally by date ascending
+      data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else {
+      // No user filter → global
+      const globalRes = await makeQuery().order('date', { ascending: true });
+      data = globalRes.data;
+      error = globalRes.error;
+    }
+
     if (error) throw error;
-    
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       data
     });
-  } catch (error) {
-    console.error('Error fetching sessions:', error);
-    res.status(500).json({
+  } catch (err) {
+    console.error('Error fetching sessions:', err);
+    return res.status(500).json({
       success: false,
-      message: error.message
+      message: err.message
     });
   }
 };
+
 
 exports.createSession = async (req, res) => {
   try {
