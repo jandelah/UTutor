@@ -1,7 +1,7 @@
-import ResourceUploadComponent from '../components/resources/ResourceUpload';
+import ResourceUpload from '../components/resources/ResourceUpload';
 
-const ResourceUpload = () => {
-  return <ResourceUploadComponent />;
+const ResourceUploadPage = () => {
+  return <ResourceUpload />;
 };
 
-export default ResourceUpload;
+export default ResourceUploadPage;

@@ -8,9 +8,9 @@ import { CloudUpload, Description, InsertDriveFile, Check } from '@mui/icons-mat
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import PageHeader from '../components/common/PageHeader';
-import { addResource } from '../services/api/resourceService';
-import { useAuth } from '../AuthContext';
+import PageHeader from '../common/PageHeader';
+import { addResource } from '../../services/api/resourceService';
+import { useAuth } from '../../AuthContext';
 
 const ResourceUpload = () => {
   const navigate = useNavigate();
