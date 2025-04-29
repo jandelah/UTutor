@@ -74,3 +74,25 @@ export const getMenteesWithProfiles = async () => {
     throw error;
   }
 };
+// Get mentor profile by user ID
+export const getMentorProfileByUserId = async (userId) => {
+  try {
+    // This endpoint might need to be adjusted based on your actual API
+    const response = await apiClient.get(`/users/${userId}/mentor-profile`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching mentor profile:', error);
+    throw error;
+  }
+};
+// Get mentee profile by user ID
+export const getMenteeProfileByUserId = async (userId) => {
+  try {
+    // This endpoint might need to be adjusted based on your actual API
+    const response = await apiClient.get(`/users/${userId}/mentee-profile`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching mentee profile:', error);
+    throw error;
+  }
+};

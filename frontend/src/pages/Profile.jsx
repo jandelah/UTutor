@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Container, Box, Tab, Tabs, Button, Paper } from '@mui/material';
+import { 
+  Container, Box, Tab, Tabs, Button, Paper, Alert,
+  CircularProgress
+} from '@mui/material';
 import { 
   Person, CalendarMonth, MenuBook, Assessment, 
   Folder, History 
@@ -10,58 +13,116 @@ import ProfileHeader from '../components/profile/ProfileHeader';
 import MentorInfo from '../components/profile/MentorInfo';
 import MenteeInfo from '../components/profile/MenteeInfo';
 import { getUserById, getMentorProfileByUserId, getMenteeProfileByUserId } from '../services/api/userService';
+import { useAuth } from '../AuthContext';
 
 const Profile = () => {
+  const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [user, setUser] = useState(null);
   const [mentorProfile, setMentorProfile] = useState(null);
   const [menteeProfile, setMenteeProfile] = useState(null);
   
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // En una implementación real, obtendríamos el ID del usuario actual
-        // desde un contexto de autenticación
-        const userId = 1; // ID de ejemplo
-        
-        // Obtener datos del usuario
-        const userData = await getUserById(userId);
-        setUser(userData);
-        
-        // Intentar obtener perfiles de mentor y mentee
+    if (currentUser) {
+      fetchUserData(currentUser.id);
+    } else {
+      setLoading(false);
+      setError("User not authenticated");
+    }
+  }, [currentUser]);
+  
+  const fetchUserData = async (userId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Load the user data from context or fetch it
+      setUser(currentUser || await getUserById(userId));
+      
+      // Try to load mentor profile if user is a tutor
+      if (currentUser?.role === 'TUTOR') {
         try {
           const mentorData = await getMentorProfileByUserId(userId);
           setMentorProfile(mentorData);
-        } catch (error) {
-          console.log('No mentor profile found');
+        } catch (err) {
+          console.log('No mentor profile found or error loading it', err);
+          // No need to set a global error, this is an expected case for new users
         }
-        
+      }
+      
+      // Try to load mentee profile if user is a tutorado
+      if (currentUser?.role === 'TUTORADO') {
         try {
           const menteeData = await getMenteeProfileByUserId(userId);
           setMenteeProfile(menteeData);
-        } catch (error) {
-          console.log('No mentee profile found');
+        } catch (err) {
+          console.log('No mentee profile found or error loading it', err);
+          // No need to set a global error, this is an expected case for new users
         }
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    fetchData();
-  }, []);
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      setError("Failed to load profile data. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+  };
+  
+  const handleRetry = () => {
+    if (currentUser) {
+      fetchUserData(currentUser.id);
+    }
   };
   
   if (loading) {
     return <LoadingSpinner message="Cargando perfil..." />;
   }
   
-  const isMentor = user.role === 'MENTOR';
+  if (error) {
+    return (
+      <Container maxWidth="lg">
+        <PageHeader 
+          title="Mi Perfil" 
+          subtitle="Gestiona tu información y preferencias de mentoría"
+          breadcrumbs={[{ text: 'Mi Perfil', link: '/profile' }]}
+        />
+        <Alert 
+          severity="error" 
+          sx={{ mt: 3 }}
+          action={
+            <Button color="inherit" size="small" onClick={handleRetry}>
+              Reintentar
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <Container maxWidth="lg">
+        <PageHeader 
+          title="Mi Perfil" 
+          subtitle="Gestiona tu información y preferencias de mentoría"
+          breadcrumbs={[{ text: 'Mi Perfil', link: '/profile' }]}
+        />
+        <Alert severity="info">
+          Por favor inicia sesión para ver tu perfil
+        </Alert>
+      </Container>
+    );
+  }
+  
+  const isMentor = user.role === 'TUTOR';
   
   return (
     <Container maxWidth="lg">
@@ -102,6 +163,9 @@ const Profile = () => {
               <MenteeInfo profile={menteeProfile} />
             ) : (
               <Box sx={{ py: 4, textAlign: 'center' }}>
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  No se encontró un perfil completo. Por favor completa tu información de perfil.
+                </Alert>
                 <Button variant="contained" color="primary">
                   Crear Perfil de {isMentor ? 'Mentor' : 'Mentee'}
                 </Button>
@@ -111,31 +175,41 @@ const Profile = () => {
           
           {tabValue === 1 && (
             <Box sx={{ py: 4, textAlign: 'center' }}>
-              Contenido de Sesiones (por implementar)
+              <Alert severity="info">
+                Contenido de Sesiones (por implementar)
+              </Alert>
             </Box>
           )}
           
           {tabValue === 2 && (
             <Box sx={{ py: 4, textAlign: 'center' }}>
-              Contenido de Recursos (por implementar)
+              <Alert severity="info">
+                Contenido de Recursos (por implementar)
+              </Alert>
             </Box>
           )}
           
           {tabValue === 3 && (
             <Box sx={{ py: 4, textAlign: 'center' }}>
-              Contenido de Estadísticas (por implementar)
+              <Alert severity="info">
+                Contenido de Estadísticas (por implementar)
+              </Alert>
             </Box>
           )}
           
           {tabValue === 4 && (
             <Box sx={{ py: 4, textAlign: 'center' }}>
-              Contenido de Documentos (por implementar)
+              <Alert severity="info">
+                Contenido de Documentos (por implementar)
+              </Alert>
             </Box>
           )}
           
           {tabValue === 5 && (
             <Box sx={{ py: 4, textAlign: 'center' }}>
-              Contenido de Historial (por implementar)
+              <Alert severity="info">
+                Contenido de Historial (por implementar)
+              </Alert>
             </Box>
           )}
         </Box>
