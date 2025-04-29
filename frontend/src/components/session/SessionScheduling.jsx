@@ -6,7 +6,7 @@ import {
   DialogTitle, DialogContent, DialogActions, Alert,
   LinearProgress, FormHelperText, Divider, IconButton,
   List, ListItem, ListItemIcon, ListItemText, Avatar,
-  CircularProgress
+  CircularProgress, Paper // Added Paper here
 } from '@mui/material';
 import { 
   CalendarMonth, LocationOn, VideoCall, 
