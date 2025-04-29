@@ -5,25 +5,33 @@ import {
   TextField, InputAdornment, IconButton, Divider, Avatar,
   Dialog, DialogTitle, DialogContent, DialogActions,
   FormControl, InputLabel, Select, MenuItem, Menu,
-  Link as MuiLink, Tooltip, List, ListItem, ListItemIcon, ListItemText
+  Link as MuiLink, Tooltip, List, ListItem, ListItemIcon, ListItemText,
+  Snackbar, Alert, LinearProgress
 } from '@mui/material';
 import { 
   Search, FilterList, CloudDownload, Share, Favorite, FavoriteBorder,
   MoreVert, CategoryOutlined, SchoolOutlined, DescriptionOutlined, 
   StarOutline, Add, Sort, CloudUpload, GetApp, OpenInNew,
-  BookmarkBorder, Bookmark, Person, VisibilityOutlined, SortByAlpha
+  BookmarkBorder, Bookmark, Person, VisibilityOutlined, SortByAlpha,
+  Refresh
 } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import ResourceRating from '../components/resources/ResourceRating';
 import { 
   getResources, 
   getResourcesBySubject, 
-  getTopRatedResources 
+  getTopRatedResources,
+  trackDownload 
 } from '../services/api/resourceService';
+import { useAuth } from '../AuthContext';
 
 const Resources = () => {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [resources, setResources] = useState([]);
   const [filteredResources, setFilteredResources] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,27 +47,67 @@ const Resources = () => {
   });
   const [sortOption, setSortOption] = useState('date');
   const [savedResources, setSavedResources] = useState([]);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info'
+  });
   
   useEffect(() => {
-    const fetchResources = async () => {
-      try {
-        const data = await getResources();
-        setResources(data);
-        
-        // Simulate saved resources (in a real app, this would come from the backend)
-        setSavedResources([data[0].id, data[2].id]);
-        
-        // Apply initial filtering based on active tab
-        filterResourcesByTab(data, tabValue);
-      } catch (error) {
-        console.error('Error fetching resources:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    loadResources();
     
-    fetchResources();
+    // Load saved resources from localStorage (in a real app this would come from the API)
+    const saved = localStorage.getItem('savedResources');
+    if (saved) {
+      setSavedResources(JSON.parse(saved));
+    }
   }, []);
+  
+  const loadResources = async () => {
+    try {
+      setLoading(true);
+      const data = await getResources();
+      setResources(data);
+      
+      // Apply initial filtering based on active tab
+      filterResourcesByTab(data, tabValue);
+    } catch (error) {
+      console.error('Error fetching resources:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error al cargar los recursos. Intenta de nuevo.',
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const refreshResources = async () => {
+    try {
+      setRefreshing(true);
+      const data = await getResources();
+      setResources(data);
+      
+      // Apply current filters
+      filterResourcesByTab(data, tabValue);
+      
+      setSnackbar({
+        open: true,
+        message: 'Recursos actualizados correctamente',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error refreshing resources:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error al actualizar los recursos',
+        severity: 'error'
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
   
   const filterResourcesByTab = (data, tab) => {
     let filtered = [...data];
@@ -206,15 +254,80 @@ const Resources = () => {
   
   const toggleSaveResource = (resourceId) => {
     if (savedResources.includes(resourceId)) {
-      setSavedResources(savedResources.filter(id => id !== resourceId));
+      const newSaved = savedResources.filter(id => id !== resourceId);
+      setSavedResources(newSaved);
+      localStorage.setItem('savedResources', JSON.stringify(newSaved));
+      
+      setSnackbar({
+        open: true,
+        message: 'Recurso eliminado de guardados',
+        severity: 'info'
+      });
     } else {
-      setSavedResources([...savedResources, resourceId]);
+      const newSaved = [...savedResources, resourceId];
+      setSavedResources(newSaved);
+      localStorage.setItem('savedResources', JSON.stringify(newSaved));
+      
+      setSnackbar({
+        open: true,
+        message: 'Recurso guardado correctamente',
+        severity: 'success'
+      });
     }
     
     // If we're on the saved tab, we need to update the filtered resources
     if (tabValue === 3) {
       filterResourcesByTab(resources, 3);
     }
+  };
+  
+  const handleDownload = async (resourceId) => {
+    try {
+      // Track the download
+      await trackDownload(resourceId);
+      
+      // Update the resource in our local state
+      const updatedResources = resources.map(resource => {
+        if (resource.id === resourceId) {
+          return { ...resource, downloads: resource.downloads + 1 };
+        }
+        return resource;
+      });
+      
+      setResources(updatedResources);
+      
+      // If the selected resource is open in details dialog, update it there too
+      if (selectedResource && selectedResource.id === resourceId) {
+        setSelectedResource({
+          ...selectedResource,
+          downloads: selectedResource.downloads + 1
+        });
+      }
+      
+      filterResourcesByTab(updatedResources, tabValue);
+      
+      setSnackbar({
+        open: true,
+        message: 'Descargando recurso...',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error tracking download:', error);
+    }
+  };
+  
+  const handleRatingSubmitted = (updatedResource) => {
+    // Update the resource in our local state
+    const updatedResources = resources.map(resource => {
+      if (resource.id === updatedResource.id) {
+        return updatedResource;
+      }
+      return resource;
+    });
+    
+    setResources(updatedResources);
+    setSelectedResource(updatedResource);
+    filterResourcesByTab(updatedResources, tabValue);
   };
   
   // Helper function to format date (in a real app, resources would have real dates)
@@ -229,6 +342,25 @@ const Resources = () => {
     });
   };
   
+  // Helper to get the creator's name based on ID
+  const getCreatorName = (creatorId) => {
+    switch (creatorId) {
+      case 1: return 'Ana García';
+      case 2: return 'Carlos Mendoza';
+      case 3: return 'Laura Jiménez';
+      case 4: return 'Miguel Torres';
+      case 5: return 'Sofia Ramírez';
+      default: return 'Usuario desconocido';
+    }
+  };
+  
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+  
   if (loading) {
     return <LoadingSpinner message="Cargando recursos..." />;
   }
@@ -240,6 +372,10 @@ const Resources = () => {
         subtitle="Explora y comparte material educativo para reforzar el aprendizaje"
         breadcrumbs={[{ text: 'Recursos', link: '/resources' }]}
       />
+      
+      {refreshing && (
+        <LinearProgress sx={{ mb: 2 }} />
+      )}
       
       <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -258,12 +394,11 @@ const Resources = () => {
               ),
             }}
           />
-          <Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             <Button 
               variant="outlined"
               startIcon={<FilterList />}
               onClick={handleFilterClick}
-              sx={{ mr: 1 }}
             >
               Filtrar
             </Button>
@@ -271,9 +406,16 @@ const Resources = () => {
               variant="outlined"
               startIcon={<Sort />}
               onClick={handleSortClick}
-              sx={{ mr: 1 }}
             >
               Ordenar
+            </Button>
+            <Button 
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={refreshResources}
+              disabled={refreshing}
+            >
+              Actualizar
             </Button>
             <Button 
               variant="contained" 
@@ -469,9 +611,7 @@ const Resources = () => {
                       size="small" 
                       color="primary" 
                       startIcon={<CloudDownload />}
-                      component="a"
-                      href={resource.url}
-                      target="_blank"
+                      onClick={() => handleDownload(resource.id)}
                     >
                       Descargar
                     </Button>
@@ -645,11 +785,7 @@ const Resources = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           <Person fontSize="small" color="action" sx={{ mr: 1 }} />
                           <Typography variant="body1">
-                            <strong>Creado por:</strong> {
-                              selectedResource.createdBy === 1 ? 'Ana García' :
-                              selectedResource.createdBy === 2 ? 'Carlos Mendoza' :
-                              selectedResource.createdBy === 5 ? 'Sofia Ramírez' : 'Usuario desconocido'
-                            }
+                            <strong>Creado por:</strong> {getCreatorName(selectedResource.createdBy)}
                           </Typography>
                         </Box>
                       </Grid>
@@ -692,9 +828,7 @@ const Resources = () => {
                       color="primary" 
                       fullWidth
                       startIcon={<CloudDownload />}
-                      component="a"
-                      href={selectedResource.url}
-                      target="_blank"
+                      onClick={() => handleDownload(selectedResource.id)}
                       sx={{ mb: 1 }}
                     >
                       Descargar Recurso
@@ -730,13 +864,10 @@ const Resources = () => {
                         {selectedResource.averageRating} de 5 ({selectedResource.ratings.length} reseñas)
                       </Typography>
                     </Box>
-                    <Button 
-                      variant="text" 
-                      startIcon={<StarOutline />}
-                      size="small"
-                    >
-                      Calificar
-                    </Button>
+                    <ResourceRating 
+                      resourceId={selectedResource.id} 
+                      onRatingSubmitted={handleRatingSubmitted}
+                    />
                   </Box>
                   
                   <List sx={{ p: 0 }}>
@@ -752,18 +883,23 @@ const Resources = () => {
                           primary={
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <Typography variant="subtitle2">
-                                {rating.userId === 1 ? 'Ana García' :
-                                 rating.userId === 2 ? 'Carlos Mendoza' :
-                                 rating.userId === 3 ? 'Laura Jiménez' :
-                                 rating.userId === 4 ? 'Miguel Torres' : 'Sofia Ramírez'}
+                                {getCreatorName(rating.userId)}
                               </Typography>
                               <Rating value={rating.score} size="small" readOnly />
                             </Box>
                           }
-                          secondary={rating.comment}
+                          secondary={rating.comment || "Sin comentarios"}
                         />
                       </ListItem>
                     ))}
+                    
+                    {selectedResource.ratings.length === 0 && (
+                      <Box sx={{ py: 2, textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                          No hay reseñas todavía. ¡Sé el primero en calificar!
+                        </Typography>
+                      </Box>
+                    )}
                   </List>
                 </Grid>
               </Grid>
@@ -776,6 +912,23 @@ const Resources = () => {
           </>
         )}
       </Dialog>
+      
+      {/* Snackbar for notifications */}
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={4000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
