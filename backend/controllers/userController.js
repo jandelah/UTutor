@@ -154,23 +154,49 @@ exports.updateProfile = async (req, res) => {
 };
 
 
+
 exports.getUsers = async (req, res) => {
   try {
-    const { role } = req.query;       // e.g. "TUTOR" or "TUTORADO"
-    let query = supabase
+    const { role } = req.query;   // e.g. "TUTOR" or "TUTORADO"
+    
+    // Select only the existing columns
+    let q = supabase
       .from('users')
-      .select('id, firstName, lastName, email, role');
+      .select(`
+        id,
+        name,
+        avatar_url,
+        career,
+        semester,
+        role,
+        created_at,
+        updated_at
+      `);
 
+    // Apply role filter if provided
     if (role) {
-      query = query.eq('role', role);
+      q = q.eq('role', role);
     }
 
-    const { data, error } = await query;
+    // Execute query
+    const { data, error } = await q;
     if (error) throw error;
+
+    // Map snake_case → camelCase for the client
+    const users = (data || []).map(u => ({
+      id:         u.id,
+      name:       u.name,
+      avatarUrl:  u.avatar_url,
+      career:     u.career,
+      semester:   u.semester,
+      role:       u.role,
+      createdAt:  u.created_at,
+      updatedAt:  u.updated_at
+    }));
 
     return res.status(200).json({
       success: true,
-      data
+      data: users
     });
   } catch (err) {
     console.error('Error fetching users:', err);
