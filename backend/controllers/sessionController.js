@@ -7,20 +7,51 @@ exports.getSessions = async (req, res) => {
     const { mentorship_id } = req.query;
     
     let query = supabase
-      .from('sessions')
-      .select(`
-        *,
-        mentorship:mentorship_id(
-          id,
-          tutor_id,
-          tutorado_id
-        )
-      `)
-      .or(`mentorship.tutor_id.eq.${userId},mentorship.tutorado_id.eq.${userId}`);
-    
-    if (mentorship_id) {
-      query = query.eq('mentorship_id', mentorship_id);
-    }
+  .from('sessions')
+  .select(`
+    *,
+    mentorship:mentorship_id(
+      id,
+      tutor_id,
+      tutorado_id
+    )
+  `);
+
+// Use separate filters instead of a complex OR condition
+if (userId) {
+  // First find sessions where user is the tutor
+  const tutorQuery = supabase
+    .from('sessions')
+    .select(`
+      *,
+      mentorship:mentorship_id(
+        id,
+        tutor_id,
+        tutorado_id
+      )
+    `)
+    .eq('mentorship.tutor_id', userId);
+  
+  // Then find sessions where user is the tutorado
+  const tutoradoQuery = supabase
+    .from('sessions')
+    .select(`
+      *,
+      mentorship:mentorship_id(
+        id,
+        tutor_id,
+        tutorado_id
+      )
+    `)
+    .eq('mentorship.tutorado_id', userId);
+  
+  // Execute both queries and combine the results
+  const [tutorResult, tutoradoResult] = await Promise.all([tutorQuery, tutoradoQuery]);
+  const combinedResults = [...(tutorResult.data || []), ...(tutoradoResult.data || [])];
+  
+  // Use the combined results
+  query = { data: combinedResults, error: tutorResult.error || tutoradoResult.error };
+}
     
     // Order by date
     query = query.order('date', { ascending: true });
