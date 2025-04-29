@@ -152,3 +152,31 @@ exports.updateProfile = async (req, res) => {
     });
   }
 };
+
+
+exports.getUsers = async (req, res) => {
+  try {
+    const { role } = req.query;       // e.g. "TUTOR" or "TUTORADO"
+    let query = supabase
+      .from('users')
+      .select('id, firstName, lastName, email, role');
+
+    if (role) {
+      query = query.eq('role', role);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+};

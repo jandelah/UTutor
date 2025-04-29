@@ -80,7 +80,7 @@ apiClient.interceptors.response.use(
         if (window.location.pathname !== '/login') {
           // Store the current location to redirect back after login
           localStorage.setItem('redirectAfterLogin', window.location.pathname);
-          window.location.href = '/login?session=expired';
+          window.location.href = '/UTutor';
         }
       }
     } else if (error.request) {
