@@ -19,7 +19,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
   const [success, setSuccess] = useState(false);
   const { currentUser } = useAuth();
   
-  const steps = ['Detalles de la tutoría', 'Objetivos y expectativas', 'Revisión y envío'];
+  const steps = ['Detalles de la asesoría', 'Objetivos y expectativas', 'Revisión y envío'];
   
   // Areas of expertise to select from (would come from mentor profile in a real app)
   const expertiseAreas = mentor?.expertise || [
@@ -162,7 +162,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
       }, 2000);
     } catch (error) {
       console.error('Error creating mentorship:', error);
-      formik.setFieldError('submit', 'Error al crear la tutoría. Intenta nuevamente más tarde.');
+      formik.setFieldError('submit', 'Error al crear la asesoría. Intenta nuevamente más tarde.');
     } finally {
       setSubmitting(false);
     }
@@ -178,7 +178,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
               Áreas de enfoque
             </Typography>
             <Typography variant="body2" color="text.secondary" paragraph>
-              Selecciona las áreas en las que deseas recibir tutoría (máximo 5):
+              Selecciona las áreas en las que deseas recibir asesoría (máximo 5):
             </Typography>
             
             <Box sx={{ mb: 3 }}>
@@ -230,7 +230,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
               Objetivos de aprendizaje
             </Typography>
             <Typography variant="body2" color="text.secondary" paragraph>
-              Describe brevemente qué esperas lograr con esta tutoría:
+              Describe brevemente qué esperas lograr con esta asesoría:
             </Typography>
             
             <TextField
@@ -320,7 +320,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
               rows={3}
               name="additionalNotes"
               id="additionalNotes"
-              placeholder="Cualquier información adicional que quieras compartir con el tutor..."
+              placeholder="Cualquier información adicional que quieras compartir con el asesor..."
               value={formik.values.additionalNotes}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -348,7 +348,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
         onClick={handleOpen}
         fullWidth
       >
-        Solicitar Mentoría
+        Solicitar Asesoría
       </Button>
       
       <Dialog
@@ -358,7 +358,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
         fullWidth
       >
         <DialogTitle>
-          {success ? 'Solicitud Enviada' : `Solicitar Mentoría con ${mentor?.name || 'Tutor'}`}
+          {success ? 'Solicitud Enviada' : `Solicitar Asesoría con ${mentor?.name || 'Asesor'}`}
         </DialogTitle>
         
         <DialogContent dividers>
@@ -369,7 +369,7 @@ const MentorshipRequest = ({ mentor, onSuccess }) => {
                 ¡Solicitud enviada exitosamente!
               </Typography>
               <Typography variant="body1">
-                Tu solicitud ha sido enviada. El tutor revisará tu solicitud y te contactará pronto.
+                Tu solicitud ha sido enviada. El asesor revisará tu solicitud y te contactará pronto.
               </Typography>
             </Box>
           ) : (

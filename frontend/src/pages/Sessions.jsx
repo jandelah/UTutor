@@ -170,8 +170,8 @@ const Sessions = () => {
   return (
     <Container maxWidth="lg">
       <PageHeader 
-        title="Sesiones de Mentoría" 
-        subtitle="Administra tus sesiones de mentoría pasadas y futuras"
+        title="Sesiones de Asesoría" 
+        subtitle="Administra tus sesiones de asesoría pasadas y futuras"
         breadcrumbs={[{ text: 'Sesiones', link: '/sessions' }]}
       />
 
@@ -502,7 +502,7 @@ const Sessions = () => {
                       <Grid item xs={12} sm={6}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                           <Typography variant="subtitle2" gutterBottom>
-                            Feedback del Mentor
+                            Feedback del Asesor
                           </Typography>
                           <Typography variant="body2" paragraph>
                             {selectedSession.feedback.mentor.comments}
@@ -515,7 +515,7 @@ const Sessions = () => {
                       <Grid item xs={12} sm={6}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                           <Typography variant="subtitle2" gutterBottom>
-                            Feedback del Mentee
+                            Feedback del Asesorado
                           </Typography>
                           <Typography variant="body2" paragraph>
                             {selectedSession.feedback.mentee.comments}

@@ -42,8 +42,8 @@ const Navbar = () => {
   
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Buscar Tutor', icon: <People />, path: '/search' },
-    { text: 'Mis Tutorías', icon: <School />, path: '/tutoring' },
+    { text: 'Buscar Asesor', icon: <People />, path: '/search' },
+    { text: 'Mis Asesorías', icon: <School />, path: '/tutoring' },
     { text: 'Sesiones', icon: <CalendarMonth />, path: '/sessions' },
     { text: 'Recursos', icon: <Book />, path: '/resources' },
   ];

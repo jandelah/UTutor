@@ -84,7 +84,7 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
         tutorId: mentor.id,
         tutoradoId: currentUser?.id || 3, // Default to a tutorado ID if user not available
         focusAreas: selectedAreas,
-        notes: `Solicitud de tutoría enviada desde la página de búsqueda el ${format(new Date(), 'PP', { locale: es })}`
+        notes: `Solicitud de asesoría enviada desde la página de búsqueda el ${format(new Date(), 'PP', { locale: es })}`
       };
       
       // Create the mentorship
@@ -124,23 +124,30 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
         }}
       >
         <CardContent sx={{ flexGrow: 1, pt: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar
-              src={mentor.avatar}
-              alt={mentor.name}
-              sx={{ width: 70, height: 70, mr: 2, border: '2px solid', borderColor: 'primary.main' }}
-            />
-            <Box>
-              <Typography variant="h5" component="div" gutterBottom={false}>
-                {mentor.name}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Rating value={mentor.rating} precision={0.1} size="small" readOnly />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  ({mentor.rating.toFixed(1)})
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Avatar
+                src={mentor.avatar}
+                alt={mentor.name}
+                sx={{ width: 70, height: 70, mr: 2, border: '2px solid', borderColor: 'primary.main' }}
+              />
+              <Box>
+                <Typography variant="h5" component="div" gutterBottom={false}>
+                  {mentor.name}
                 </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Rating value={mentor.rating} precision={0.1} size="small" readOnly />
+                  <Typography variant="body2" sx={{ ml: 1 }}>
+                    ({mentor.rating.toFixed(1)})
+                  </Typography>
+                </Box>
               </Box>
             </Box>
+            <Chip
+              label={mentor.status === 'ACTIVE' ? 'Activo' : 'Completado'}
+              color={mentor.status === 'ACTIVE' ? 'success' : 'default'}
+              size="small"
+            />
           </Box>
           
           <Box sx={{ mb: 2 }}>
@@ -166,7 +173,7 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
           <Typography variant="subtitle1" gutterBottom>
             Áreas de expertise
           </Typography>
-          <Box sx={{ mb: 2 }}>
+          <Box>
             {mentor.expertise.map((skill, index) => (
               <Chip
                 key={index}
@@ -225,7 +232,7 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
                             <AccessTime fontSize="small" />
                           </ListItemIcon>
                           <ListItemText 
-                            primary="Tiempo como mentor" 
+                            primary="Tiempo como asesor" 
                             secondary={mentor.experience || "2 semestres"} 
                           />
                         </ListItem>
@@ -331,7 +338,7 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
               startIcon={<School />}
               onClick={handleOpenRequestDialog}
             >
-              Solicitar Mentoría
+              Solicitar Asesoría
             </Button>
           </Box>
         </CardActions>
@@ -345,7 +352,7 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
         fullWidth
       >
         <DialogTitle>
-          Solicitar Mentoría a {mentor.name}
+          Solicitar Asesoría a {mentor.name}
         </DialogTitle>
         <DialogContent dividers>
           {requestSuccess ? (
@@ -361,7 +368,7 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
           ) : (
             <>
               <Typography variant="body1" paragraph>
-                Estás a punto de solicitar una mentoría con {mentor.name}. Por favor selecciona las áreas en las que te gustaría recibir apoyo:
+                Estás a punto de solicitar una asesoría con {mentor.name}. Por favor selecciona las áreas en las que te gustaría recibir apoyo:
               </Typography>
               
               <Typography variant="subtitle1" gutterBottom>
@@ -398,7 +405,7 @@ const MentorProfileCard = ({ mentor, onRequestSuccess }) => {
               
               <Typography variant="body2" color="text.secondary">
                 Después de enviar tu solicitud, {mentor.name} recibirá una notificación y podrá aceptarla o rechazarla.
-                Una vez aceptada, podrás programar sesiones de mentoría según la disponibilidad de ambos.
+                Una vez aceptada, podrás programar sesiones de asesoría según la disponibilidad de ambos.
               </Typography>
             </>
           )}

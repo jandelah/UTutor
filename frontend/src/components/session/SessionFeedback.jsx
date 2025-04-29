@@ -14,7 +14,7 @@ import * as Yup from 'yup';
 import { useAuth } from '../../AuthContext';
 import { addSessionFeedback } from '../../services/api/mentorshipService';
 
-const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tutorado', onFeedbackSubmitted }) => {
+const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'asesorado', onFeedbackSubmitted }) => {
   const { currentUser } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -26,14 +26,14 @@ const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tut
     usefulness: Yup.number()
       .required('Este campo es requerido')
       .min(1, 'Debe seleccionar una calificación'),
-    engagement: userType === 'tutor' ? Yup.number()
+    engagement: userType === 'asesor' ? Yup.number()
       .required('Este campo es requerido')
       .min(1, 'Debe seleccionar una calificación') : Yup.number(),
-    pace: userType === 'tutorado' ? Yup.number()
+    pace: userType === 'asesorado' ? Yup.number()
       .required('Este campo es requerido')
       .min(1, 'Debe seleccionar una calificación') : Yup.number(),
     learningAreas: Yup.array().when('userType', {
-      is: 'tutorado',
+      is: 'asesorado',
       then: () => Yup.array().min(1, 'Seleccione al menos un área')
     }),
     comments: Yup.string()
@@ -44,8 +44,8 @@ const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tut
     initialValues: {
       clarity: 0,
       usefulness: 0,
-      engagement: userType === 'tutor' ? 0 : undefined,
-      pace: userType === 'tutorado' ? 0 : undefined,
+      engagement: userType === 'asesor' ? 0 : undefined,
+      pace: userType === 'asesorado' ? 0 : undefined,
       learningAreas: [],
       comments: '',
       userType: userType
@@ -61,7 +61,7 @@ const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tut
         };
         
         // Add additional fields based on user type
-        if (userType === 'tutor') {
+        if (userType === 'asesor') {
           feedback.engagement = values.engagement;
         } else {
           feedback.pace = values.pace;
@@ -151,7 +151,7 @@ const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tut
         onClick={handleOpenDialog}
         disabled={!isCompleted}
       >
-        {userType === 'tutor' ? 'Evaluar al Tutorado' : 'Evaluar la Tutoría'}
+        {userType === 'asesor' ? 'Evaluar al Asesorado' : 'Evaluar la Asesoría'}
       </Button>
       
       <Dialog
@@ -161,7 +161,7 @@ const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tut
         fullWidth
       >
         <DialogTitle>
-          {userType === 'tutor' ? 'Evaluar al Tutorado' : 'Evaluar la Tutoría'}
+          {userType === 'asesor' ? 'Evaluar al Asesorado' : 'Evaluar la Asesoría'}
         </DialogTitle>
         
         <DialogContent dividers>
@@ -250,10 +250,10 @@ const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tut
                 )}
               </Box>
               
-              {userType === 'tutor' ? (
+              {userType === 'asesor' ? (
                 <Box sx={{ mb: 4 }}>
                   <Typography variant="subtitle1" gutterBottom>
-                    Nivel de participación del tutorado
+                    Nivel de participación del asesorado
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Rating
@@ -318,7 +318,7 @@ const SessionFeedback = ({ sessionId, sessionTitle, isCompleted, userType = 'tut
                 </Box>
               )}
               
-              {userType === 'tutorado' && (
+              {userType === 'asesorado' && (
                 <Box sx={{ mb: 4 }}>
                   <Typography variant="subtitle1" gutterBottom>
                     Áreas de aprendizaje fortalecidas

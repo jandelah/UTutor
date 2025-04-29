@@ -17,7 +17,7 @@ const Home = () => {
     {
       icon: <CalendarMonth fontSize="large" color="primary" />,
       title: 'Sesiones Flexibles',
-      description: 'Programa sesiones de tutoría que se adapten a tu horario académico.'
+      description: 'Programa sesiones de asesoría que se adapten a tu horario académico.'
     },
     {
       icon: <TrendingUp fontSize="large" color="primary" />,
@@ -45,7 +45,7 @@ const Home = () => {
                 Potencia tu desarrollo académico
               </Typography>
               <Typography variant="h5" paragraph>
-                Conecta con tutores de la UTSJR para mejorar tus habilidades técnicas y profesionales.
+                Conecta con asesores de la UTSJR para mejorar tus habilidades técnicas y profesionales.
               </Typography>
               <Box sx={{ mt: 4 }}>
                 <Button 
@@ -131,7 +131,7 @@ const Home = () => {
             color="text.secondary"
             sx={{ mb: 6 }}
           >
-            Tres simples pasos para comenzar tu experiencia de tutoría
+            Tres simples pasos para comenzar tu experiencia de asesoría
           </Typography>
           
           <Grid container spacing={4} alignItems="center">
@@ -167,7 +167,7 @@ const Home = () => {
                     2. Encuentra tu match
                   </Typography>
                   <Typography variant="body1">
-                    Busca tutores o tutorados según tus necesidades académicas.
+                    Busca asesores o asesorados según tus necesidades académicas.
                   </Typography>
                 </CardContent>
               </Card>
@@ -186,7 +186,7 @@ const Home = () => {
                     3. Programa sesiones
                   </Typography>
                   <Typography variant="body1">
-                    Coordina y participa en sesiones de tutoría, compartiendo conocimientos.
+                    Coordina y participa en sesiones de asesoría, compartiendo conocimientos.
                   </Typography>
                 </CardContent>
               </Card>

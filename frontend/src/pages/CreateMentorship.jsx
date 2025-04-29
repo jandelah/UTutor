@@ -46,7 +46,7 @@ const CreateMentorship = () => {
       setMentees(data || []);
     } catch (err) {
       console.error("Error fetching mentees:", err);
-      setError("Error al cargar los tutorados. Inténtalo de nuevo más tarde.");
+      setError("Error al cargar los asesorados. Inténtalo de nuevo más tarde.");
     } finally {
       setLoadingMentees(false);
     }
@@ -56,7 +56,7 @@ const CreateMentorship = () => {
     e.preventDefault();
     
     if (!selectedMentee) {
-      setError("Por favor, selecciona un tutorado");
+      setError("Por favor, selecciona un asesorado");
       return;
     }
     
@@ -82,12 +82,12 @@ const CreateMentorship = () => {
       navigate('/tutoring', { 
         state: { 
           success: true, 
-          message: 'Mentoría creada correctamente'
+          message: 'Asesoría creada correctamente'
         }
       });
     } catch (err) {
       console.error("Error creating mentorship:", err);
-      setError("Error al crear la mentoría. Inténtalo de nuevo más tarde.");
+      setError("Error al crear la asesoría. Inténtalo de nuevo más tarde.");
     } finally {
       setLoading(false);
     }
@@ -107,10 +107,10 @@ const CreateMentorship = () => {
   return (
     <Container maxWidth="md">
       <PageHeader 
-        title="Crear Nueva Mentoría" 
-        subtitle="Inicia una nueva relación de mentoría con un estudiante"
+        title="Crear Nueva Asesoría" 
+        subtitle="Inicia una nueva relación de asesoría con un estudiante"
         breadcrumbs={[
-          { text: 'Mis Mentorías', link: '/tutoring' },
+          { text: 'Mis Asesorías', link: '/tutoring' },
           { text: 'Crear Nueva', link: '/tutoring/create' }
         ]}
       />
@@ -126,7 +126,7 @@ const CreateMentorship = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                Seleccionar Tutorado
+                Seleccionar Asesorado
               </Typography>
               
               <Autocomplete
@@ -158,7 +158,7 @@ const CreateMentorship = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Buscar tutorado por nombre"
+                    label="Buscar asesorado por nombre"
                     InputProps={{
                       ...params.InputProps,
                       endAdornment: (
@@ -173,7 +173,7 @@ const CreateMentorship = () => {
               />
               
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Selecciona un estudiante de la lista o configura una mentoría abierta
+                Selecciona un estudiante de la lista o configura una asesoría abierta
               </Typography>
             </Grid>
             
@@ -268,12 +268,12 @@ const CreateMentorship = () => {
               
               <TextField
                 fullWidth
-                label="Notas de la mentoría"
+                label="Notas de la asesoría"
                 multiline
                 rows={4}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Describe los objetivos, expectativas o cualquier información relevante para la mentoría..."
+                placeholder="Describe los objetivos, expectativas o cualquier información relevante para la asesoría..."
               />
             </Grid>
             
@@ -298,7 +298,7 @@ const CreateMentorship = () => {
                       Creando...
                     </>
                   ) : (
-                    'Crear Mentoría'
+                    'Crear Asesoría'
                   )}
                 </Button>
               </Box>

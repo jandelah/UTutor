@@ -50,14 +50,14 @@ const Dashboard = () => {
     <Container maxWidth="lg">
       <PageHeader 
         title={`Bienvenido, ${currentUser?.name.split(' ')[0]}`}
-        subtitle="Visualiza el progreso y estado de tus tutorías"
+        subtitle="Visualiza el progreso y estado de tus asesorías"
       />
       
       <Grid container spacing={3}>
         {/* Tarjetas de estadísticas */}
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Tutorías Activas" 
+            title="Asesorías Activas" 
             value={stats?.activeTutorias ?? 0}  
             icon={<Group />}
             color="primary"
@@ -108,7 +108,7 @@ const Dashboard = () => {
             />  
         </Grid>
         
-        {/* Tutores destacados */}
+        {/* Asesores destacados */}
         <Grid item xs={12} md={4}>
           <TopMentorsList mentors={stats.topTutores} />
         </Grid>

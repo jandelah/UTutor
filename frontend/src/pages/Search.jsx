@@ -84,7 +84,7 @@ const Search = () => {
     if (!currentUser) {
       setSnackbar({
         open: true,
-        message: 'Por favor inicia sesión para solicitar una mentoría',
+        message: 'Por favor inicia sesión para solicitar una asesoría',
         severity: 'warning'
       });
       return;
@@ -103,7 +103,7 @@ const Search = () => {
   const handleRequestSuccess = () => {
     setSnackbar({
       open: true,
-      message: '¡Solicitud de mentoría enviada con éxito!',
+      message: '¡Solicitud de asesoría enviada con éxito!',
       severity: 'success'
     });
   };
@@ -135,9 +135,9 @@ const Search = () => {
     return (
       <Container maxWidth="lg">
         <PageHeader 
-          title="Buscar Mentor" 
-          subtitle="Encuentra al mentor ideal para tus necesidades académicas"
-          breadcrumbs={[{ text: 'Buscar Mentor', link: '/search' }]}
+          title="Buscar Asesor" 
+          subtitle="Encuentra al asesor ideal para tus necesidades académicas"
+          breadcrumbs={[{ text: 'Buscar Asesor', link: '/search' }]}
         />
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress />
@@ -149,9 +149,9 @@ const Search = () => {
   return (
     <Container maxWidth="lg">
       <PageHeader 
-        title="Buscar Mentor" 
-        subtitle="Encuentra al mentor ideal para tus necesidades académicas"
-        breadcrumbs={[{ text: 'Buscar Mentor', link: '/search' }]}
+        title="Buscar Asesor" 
+        subtitle="Encuentra al asesor ideal para tus necesidades académicas"
+        breadcrumbs={[{ text: 'Buscar Asesor', link: '/search' }]}
       />
       
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -245,7 +245,7 @@ const Search = () => {
       
       <Box sx={{ mb: 2 }}>
         <Typography variant="h6" component="div">
-          {filteredMentors.length} mentores encontrados
+          {filteredMentors.length} asesores encontrados
         </Typography>
       </Box>
       
@@ -332,7 +332,7 @@ const Search = () => {
                     fullWidth
                     onClick={() => handleOpenRequestDialog(mentor)}
                   >
-                    Solicitar Mentoría
+                    Solicitar Asesoría
                   </Button>
                 </CardActions>
               </Card>
@@ -344,7 +344,7 @@ const Search = () => {
       {filteredMentors.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 5 }}>
           <Typography variant="h6" color="text.secondary">
-            No se encontraron mentores con los criterios especificados
+            No se encontraron asesores con los criterios especificados
           </Typography>
           <Button 
             variant="outlined" 

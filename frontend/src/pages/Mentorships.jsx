@@ -1,75 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  Container, Grid, Typography, Paper, Box, Tabs, Tab,
+  Container, Grid, Box, Paper, Typography, Tabs, Tab,
   Card, CardContent, CardActions, Avatar, Chip, Button,
   Divider, IconButton, Tooltip, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, Rating
+  DialogContent, DialogActions, TextField, Rating,
+  Alert, CircularProgress, Snackbar
 } from '@mui/material';
 import { 
   School, CalendarMonth, Chat, AccessTime, 
   Add, MoreVert, Info, Check, Close
 } from '@mui/icons-material';
+import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import { getMentorships, updateMentorship } from '../services/api/mentorshipService';
+import { useAuth } from '../AuthContext';
 
 const Mentorships = () => {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [tabValue, setTabValue] = useState(0);
+  const [mentorships, setMentorships] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedMentorship, setSelectedMentorship] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [error, setError] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info'
+  });
   
-  // Datos de ejemplo para mentorías
-  const mentorships = [
-    {
-      id: 1,
-      mentor: {
-        id: 1,
-        name: 'Ana García',
-        avatar: 'https://i.pravatar.cc/150?img=1',
-        rating: 4.8
-      },
-      startDate: '2023-09-01',
-      status: 'ACTIVE',
-      focusAreas: ['Programación Web', 'React', 'Frontend'],
-      nextSession: '2023-10-15T15:00:00',
-      completedSessions: 3,
-      upcomingSessions: 2
-    },
-    {
-      id: 2,
-      mentor: {
-        id: 2,
-        name: 'Carlos Mendoza',
-        avatar: 'https://i.pravatar.cc/150?img=2',
-        rating: 4.6
-      },
-      startDate: '2023-08-15',
-      status: 'ACTIVE',
-      focusAreas: ['Algoritmos', 'Estructura de Datos', 'Java'],
-      nextSession: '2023-10-18T14:00:00',
-      completedSessions: 4,
-      upcomingSessions: 1
-    },
-    {
-      id: 3,
-      mentor: {
-        id: 5,
-        name: 'Sofía Ramírez',
-        avatar: 'https://i.pravatar.cc/150?img=5',
-        rating: 4.9
-      },
-      startDate: '2023-05-10',
-      status: 'COMPLETED',
-      focusAreas: ['Diseño UX/UI', 'Wireframing', 'User Research'],
-      nextSession: null,
-      completedSessions: 8,
-      upcomingSessions: 0
+  useEffect(() => {
+    fetchMentorships();
+  }, []);
+  
+  const fetchMentorships = async () => {
+    try {
+      setLoading(true);
+      const response = await getMentorships();
+      setMentorships(response.data || []);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching mentorships:", err);
+      setError("Error al cargar las asesorías. Inténtalo de nuevo más tarde.");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
   
   // Filtrar mentorías según el tab seleccionado
   const filteredMentorships = mentorships.filter(mentorship => {
     if (tabValue === 0) return true; // Todas
     if (tabValue === 1) return mentorship.status === 'ACTIVE'; // Activas
     if (tabValue === 2) return mentorship.status === 'COMPLETED'; // Completadas
+    if (tabValue === 3) return mentorship.status === 'CANCELED'; // Canceladas
     return false;
   });
   
@@ -81,64 +66,131 @@ const Mentorships = () => {
   // Abrir diálogo de detalles
   const handleOpenDialog = (mentorship) => {
     setSelectedMentorship(mentorship);
-    setDialogOpen(true);
+    setDetailsDialogOpen(true);
   };
   
   // Cerrar diálogo
   const handleCloseDialog = () => {
-    setDialogOpen(false);
+    setDetailsDialogOpen(false);
   };
   
   // Formatear fecha
   const formatDate = (dateString) => {
+    if (!dateString) return 'No especificada';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('es-MX', options);
   };
   
-  // Formatear fecha y hora para próxima sesión
-  const formatNextSession = (dateTimeString) => {
-    if (!dateTimeString) return 'No hay sesiones programadas';
-    
-    const options = { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    };
-    return new Date(dateTimeString).toLocaleDateString('es-MX', options);
+  // End a mentorship
+  const handleEndMentorship = async (mentorshipId) => {
+    try {
+      await updateMentorship(mentorshipId, {
+        status: 'COMPLETED',
+        end_date: new Date().toISOString().split('T')[0]
+      });
+      
+      setSnackbar({
+        open: true,
+        message: 'Asesoría finalizada correctamente',
+        severity: 'success'
+      });
+      
+      handleCloseDialog();
+      fetchMentorships();
+    } catch (error) {
+      console.error("Error ending mentorship:", error);
+      setSnackbar({
+        open: true,
+        message: 'Error al finalizar la asesoría',
+        severity: 'error'
+      });
+    }
   };
+  
+  // Cancel a mentorship
+  const handleCancelMentorship = async (mentorshipId) => {
+    try {
+      await updateMentorship(mentorshipId, {
+        status: 'CANCELED'
+      });
+      
+      setSnackbar({
+        open: true,
+        message: 'Asesoría cancelada correctamente',
+        severity: 'success'
+      });
+      
+      handleCloseDialog();
+      fetchMentorships();
+    } catch (error) {
+      console.error("Error canceling mentorship:", error);
+      setSnackbar({
+        open: true,
+        message: 'Error al cancelar la asesoría',
+        severity: 'error'
+      });
+    }
+  };
+  
+  // Handle close snackbar
+  const handleCloseSnackbar = () => {
+    setSnackbar({
+      ...snackbar,
+      open: false
+    });
+  };
+  
+  if (loading) {
+    return <LoadingSpinner message="Cargando asesorías..." />;
+  }
   
   return (
     <Container maxWidth="lg">
       <PageHeader 
-        title="Mis Mentorías" 
-        subtitle="Gestiona tus mentorías activas y pasadas"
-        breadcrumbs={[{ text: 'Mis Mentorías', link: '/mentorships' }]}
+        title="Mis Asesorías" 
+        subtitle="Gestiona tus asesorías activas y pasadas"
+        breadcrumbs={[{ text: 'Mis Asesorías', link: '/tutoring' }]}
       />
       
-      <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Todas" />
             <Tab label="Activas" />
             <Tab label="Completadas" />
+            <Tab label="Canceladas" />
           </Tabs>
         </Box>
         
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6" component="div">
-            {filteredMentorships.length} mentorías encontradas
+            {filteredMentorships.length} asesorías encontradas
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={() => {}}
-          >
-            Nueva Mentoría
-          </Button>
+          {currentUser?.role === 'TUTOR' && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={() => navigate('/tutoring/create')}
+            >
+              Nueva Asesoría
+            </Button>
+          )}
         </Box>
+        
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ mb: 3 }}
+            action={
+              <Button color="inherit" size="small" onClick={fetchMentorships}>
+                Reintentar
+              </Button>
+            }
+          >
+            {error}
+          </Alert>
+        )}
         
         <Grid container spacing={3}>
           {filteredMentorships.map(mentorship => (
@@ -148,22 +200,36 @@ const Mentorships = () => {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Avatar
-                        src={mentorship.mentor.avatar}
-                        alt={mentorship.mentor.name}
+                        src={mentorship.tutor?.avatar_url}
+                        alt={mentorship.tutor?.name}
                         sx={{ width: 50, height: 50, mr: 2 }}
-                      />
+                      >
+                        {mentorship.tutor?.name?.charAt(0)}
+                      </Avatar>
                       <Box>
                         <Typography variant="h6" component="div">
-                          {mentorship.mentor.name}
+                          {mentorship.tutor?.name}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Rating value={mentorship.mentor.rating} precision={0.1} size="small" readOnly />
+                          <Rating value={mentorship.tutor?.rating || 0} precision={0.1} size="small" readOnly />
                         </Box>
                       </Box>
                     </Box>
                     <Chip
-                      label={mentorship.status === 'ACTIVE' ? 'Activa' : 'Completada'}
-                      color={mentorship.status === 'ACTIVE' ? 'success' : 'default'}
+                      label={
+                        mentorship.status === 'ACTIVE' ? 'Activa' : 
+                        mentorship.status === 'COMPLETED' ? 'Completada' : 
+                        mentorship.status === 'CANCELED' ? 'Cancelada' :
+                        mentorship.status === 'PENDING' ? 'Pendiente' :
+                        mentorship.status
+                      }
+                      color={
+                        mentorship.status === 'ACTIVE' ? 'success' : 
+                        mentorship.status === 'COMPLETED' ? 'default' : 
+                        mentorship.status === 'CANCELED' ? 'error' :
+                        mentorship.status === 'PENDING' ? 'warning' :
+                        'default'
+                      }
                       size="small"
                     />
                   </Box>
@@ -171,16 +237,16 @@ const Mentorships = () => {
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" color="text.secondary">
                       <CalendarMonth fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                      Inicio: {formatDate(mentorship.startDate)}
+                      Inicio: {formatDate(mentorship.start_date)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       <School fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                      {mentorship.completedSessions} sesiones completadas
+                      {mentorship.completedSessions || 0} sesiones completadas
                     </Typography>
                     {mentorship.status === 'ACTIVE' && (
                       <Typography variant="body2" color="text.secondary">
                         <AccessTime fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                        Próxima sesión: {formatNextSession(mentorship.nextSession)}
+                        Próxima sesión: No programada
                       </Typography>
                     )}
                   </Box>
@@ -189,7 +255,7 @@ const Mentorships = () => {
                     Áreas de enfoque
                   </Typography>
                   <Box>
-                    {mentorship.focusAreas.map((area, index) => (
+                    {mentorship.focus_areas?.map((area, index) => (
                       <Chip
                         key={index}
                         label={area}
@@ -220,6 +286,8 @@ const Mentorships = () => {
                         size="small" 
                         color="secondary"
                         startIcon={<CalendarMonth />}
+                        component={Link}
+                        to={`/sessions/new?mentorshipId=${mentorship.id}`}
                       >
                         Agendar
                       </Button>
@@ -246,24 +314,36 @@ const Mentorships = () => {
         {filteredMentorships.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 5 }}>
             <Typography variant="h6" color="text.secondary">
-              No se encontraron mentorías
+              No se encontraron asesorías
             </Typography>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              startIcon={<Add />}
-              sx={{ mt: 2 }}
-              onClick={() => {}}
-            >
-              Iniciar Nueva Mentoría
-            </Button>
+            {currentUser?.role === 'TUTOR' ? (
+              <Button 
+                variant="contained" 
+                color="primary" 
+                startIcon={<Add />}
+                sx={{ mt: 2 }}
+                onClick={() => navigate('/tutoring/create')}
+              >
+                Iniciar Nueva Asesoría
+              </Button>
+            ) : (
+              <Button 
+                variant="contained" 
+                color="primary" 
+                startIcon={<Add />}
+                sx={{ mt: 2 }}
+                onClick={() => navigate('/search')}
+              >
+                Buscar Asesor
+              </Button>
+            )}
           </Box>
         )}
       </Paper>
       
       {/* Diálogo de detalles de mentoría */}
       <Dialog
-        open={dialogOpen}
+        open={detailsDialogOpen}
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
@@ -271,7 +351,7 @@ const Mentorships = () => {
         {selectedMentorship && (
           <>
             <DialogTitle>
-              Detalles de Mentoría con {selectedMentorship.mentor.name}
+              Detalles de Asesoría con {selectedMentorship.tutor?.name}
             </DialogTitle>
             <DialogContent dividers>
               <Grid container spacing={3}>
@@ -281,16 +361,22 @@ const Mentorships = () => {
                   </Typography>
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="body2">
-                      <strong>Estado:</strong> {selectedMentorship.status === 'ACTIVE' ? 'Activa' : 'Completada'}
+                      <strong>Estado:</strong> {
+                        selectedMentorship.status === 'ACTIVE' ? 'Activa' : 
+                        selectedMentorship.status === 'COMPLETED' ? 'Completada' : 
+                        selectedMentorship.status === 'CANCELED' ? 'Cancelada' :
+                        selectedMentorship.status === 'PENDING' ? 'Pendiente' :
+                        selectedMentorship.status
+                      }
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Fecha de inicio:</strong> {formatDate(selectedMentorship.startDate)}
+                      <strong>Fecha de inicio:</strong> {formatDate(selectedMentorship.start_date)}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Sesiones completadas:</strong> {selectedMentorship.completedSessions}
+                      <strong>Sesiones completadas:</strong> {selectedMentorship.completedSessions || 0}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Sesiones programadas:</strong> {selectedMentorship.upcomingSessions}
+                      <strong>Sesiones programadas:</strong> {selectedMentorship.upcomingSessions || 0}
                     </Typography>
                   </Box>
                   
@@ -298,7 +384,7 @@ const Mentorships = () => {
                     Áreas de Enfoque
                   </Typography>
                   <Box sx={{ mb: 3 }}>
-                    {selectedMentorship.focusAreas.map((area, index) => (
+                    {selectedMentorship.focus_areas?.map((area, index) => (
                       <Chip
                         key={index}
                         label={area}
@@ -312,53 +398,47 @@ const Mentorships = () => {
                 
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle1" gutterBottom>
-                    Información del Mentor
+                    Información del Asesor
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar
-                      src={selectedMentorship.mentor.avatar}
-                      alt={selectedMentorship.mentor.name}
+                      src={selectedMentorship.tutor?.avatar_url}
+                      alt={selectedMentorship.tutor?.name}
                       sx={{ width: 60, height: 60, mr: 2 }}
-                    />
+                    >
+                      {selectedMentorship.tutor?.name?.charAt(0)}
+                    </Avatar>
                     <Box>
                       <Typography variant="h6" component="div">
-                        {selectedMentorship.mentor.name}
+                        {selectedMentorship.tutor?.name}
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Rating value={selectedMentorship.mentor.rating} precision={0.1} size="small" readOnly />
+                        <Rating value={selectedMentorship.tutor?.rating || 0} precision={0.1} size="small" readOnly />
                         <Typography variant="body2" sx={{ ml: 1 }}>
-                          ({selectedMentorship.mentor.rating})
+                          ({selectedMentorship.tutor?.rating || 0})
                         </Typography>
                       </Box>
                     </Box>
                   </Box>
                   
-                  {selectedMentorship.status === 'ACTIVE' && selectedMentorship.nextSession && (
-                    <Box sx={{ mb: 3 }}>
+                  {selectedMentorship.tutorado && (
+                    <>
                       <Typography variant="subtitle1" gutterBottom>
-                        Próxima Sesión
+                        Información del Asesorado
                       </Typography>
-                      <Typography variant="body2">
-                        {formatNextSession(selectedMentorship.nextSession)}
-                      </Typography>
-                      <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                        <Button 
-                          variant="outlined" 
-                          size="small"
-                          startIcon={<CalendarMonth />}
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Avatar
+                          src={selectedMentorship.tutorado?.avatar_url}
+                          alt={selectedMentorship.tutorado?.name}
+                          sx={{ width: 60, height: 60, mr: 2 }}
                         >
-                          Reprogramar
-                        </Button>
-                        <Button 
-                          variant="outlined" 
-                          color="error" 
-                          size="small"
-                          startIcon={<Close />}
-                        >
-                          Cancelar
-                        </Button>
+                          {selectedMentorship.tutorado?.name?.charAt(0)}
+                        </Avatar>
+                        <Typography variant="h6" component="div">
+                          {selectedMentorship.tutorado?.name}
+                        </Typography>
                       </Box>
-                    </Box>
+                    </>
                   )}
                 </Grid>
                 
@@ -371,8 +451,12 @@ const Mentorships = () => {
                     fullWidth
                     multiline
                     rows={4}
-                    placeholder="Añadir notas sobre esta mentoría..."
+                    placeholder="Añadir notas sobre esta asesoría..."
                     variant="outlined"
+                    value={selectedMentorship.notes || ''}
+                    InputProps={{
+                      readOnly: true,
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -390,14 +474,26 @@ const Mentorships = () => {
                     variant="contained" 
                     color="secondary"
                     startIcon={<CalendarMonth />}
+                    component={Link}
+                    to={`/sessions/new?mentorshipId=${selectedMentorship.id}`}
                   >
                     Agendar Sesión
                   </Button>
                   <Button 
                     variant="contained" 
                     color="error"
+                    startIcon={<Close />}
+                    onClick={() => handleCancelMentorship(selectedMentorship.id)}
                   >
-                    Finalizar Mentoría
+                    Cancelar Asesoría
+                  </Button>
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    startIcon={<Check />}
+                    onClick={() => handleEndMentorship(selectedMentorship.id)}
+                  >
+                    Finalizar Asesoría
                   </Button>
                 </>
               ) : (
@@ -413,6 +509,22 @@ const Mentorships = () => {
           </>
         )}
       </Dialog>
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

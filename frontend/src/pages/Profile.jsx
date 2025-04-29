@@ -89,7 +89,7 @@ const Profile = () => {
       <Container maxWidth="lg">
         <PageHeader 
           title="Mi Perfil" 
-          subtitle="Gestiona tu información y preferencias de mentoría"
+          subtitle="Gestiona tu información y preferencias de asesoría"
           breadcrumbs={[{ text: 'Mi Perfil', link: '/profile' }]}
         />
         <Alert 
@@ -112,7 +112,7 @@ const Profile = () => {
       <Container maxWidth="lg">
         <PageHeader 
           title="Mi Perfil" 
-          subtitle="Gestiona tu información y preferencias de mentoría"
+          subtitle="Gestiona tu información y preferencias de asesoría"
           breadcrumbs={[{ text: 'Mi Perfil', link: '/profile' }]}
         />
         <Alert severity="info">
@@ -122,20 +122,20 @@ const Profile = () => {
     );
   }
   
-  const isMentor = user.role === 'TUTOR';
+  const isAsesor = user.role === 'TUTOR';
   
   return (
     <Container maxWidth="lg">
       <PageHeader 
         title="Mi Perfil" 
-        subtitle="Gestiona tu información y preferencias de mentoría"
+        subtitle="Gestiona tu información y preferencias de asesoría"
         breadcrumbs={[{ text: 'Mi Perfil', link: '/profile' }]}
       />
       
       <ProfileHeader 
         user={user} 
-        profile={isMentor ? mentorProfile : menteeProfile} 
-        isMentor={isMentor} 
+        profile={isAsesor ? mentorProfile : menteeProfile} 
+        isMentor={isAsesor} 
         isOwnProfile={true} 
       />
       
@@ -157,7 +157,7 @@ const Profile = () => {
         
         <Box sx={{ p: 3 }}>
           {tabValue === 0 && (
-            isMentor && mentorProfile ? (
+            isAsesor && mentorProfile ? (
               <MentorInfo profile={mentorProfile} />
             ) : menteeProfile ? (
               <MenteeInfo profile={menteeProfile} />
@@ -167,7 +167,7 @@ const Profile = () => {
                   No se encontró un perfil completo. Por favor completa tu información de perfil.
                 </Alert>
                 <Button variant="contained" color="primary">
-                  Crear Perfil de {isMentor ? 'Mentor' : 'Mentee'}
+                  Crear Perfil de {isAsesor ? 'Asesor' : 'Asesorado'}
                 </Button>
               </Box>
             )

@@ -18,7 +18,7 @@ const Register = () => {
   const [registerError, setRegisterError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const steps = ['Información Personal', 'Detalles Académicos', 'Preferencias de Tutoría'];
+  const steps = ['Información Personal', 'Detalles Académicos', 'Preferencias de Asesoría'];
   
   // Esquemas de validación para cada paso (simplificados para facilitar el registro de demostración)
   const validationSchemas = [
@@ -49,18 +49,18 @@ const Register = () => {
         .max(10, 'El cuatrimestre máximo es 10'),
     }),
     
-    // Paso 3: Preferencias de Tutoría
+    // Paso 3: Preferencias de Asesoría
     Yup.object({
       role: Yup.string().required('Selecciona un rol'),
       interests: Yup.array()
         .when('role', {
-          is: 'TUTORADO',
+          is: 'ASESORADO',
           then: () => Yup.array().min(1, 'Selecciona al menos un área de interés'),
           otherwise: () => Yup.array()
         }),
       expertise: Yup.array()
         .when('role', {
-          is: 'TUTOR',
+          is: 'ASESOR',
           then: () => Yup.array().min(1, 'Selecciona al menos un área de expertise'),
           otherwise: () => Yup.array()
         })
@@ -83,7 +83,7 @@ const Register = () => {
       semester: '',
       
       // Paso 3
-      role: 'TUTORADO',
+      role: 'ASESORADO',
       interests: [],
       expertise: []
     },
@@ -96,7 +96,10 @@ const Register = () => {
       } else {
         try {
           setIsSubmitting(true);
-          await register(values);
+          // Mantener compatibilidad con el backend y su terminología
+          const apiValues = { ...values };
+          apiValues.role = apiValues.role === 'ASESOR' ? 'TUTOR' : 'TUTORADO';
+          await register(apiValues);
           navigate('/dashboard');
         } catch (error) {
           setRegisterError(error.message);
@@ -339,7 +342,7 @@ const Register = () => {
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Preferencias de Tutoría
+              Preferencias de Asesoría
             </Typography>
             
             <FormControl 
@@ -355,14 +358,14 @@ const Register = () => {
                 onBlur={formik.handleBlur}
               >
                 <FormControlLabel 
-                  value="TUTORADO" 
+                  value="ASESORADO" 
                   control={<Radio />} 
-                  label="Como Tutorado (recibir asesoría)" 
+                  label="Como Asesorado (recibir asesoría)" 
                 />
                 <FormControlLabel 
-                  value="TUTOR" 
+                  value="ASESOR" 
                   control={<Radio />} 
-                  label="Como Tutor (dar asesoría)" 
+                  label="Como Asesor (dar asesoría)" 
                 />
               </RadioGroup>
               {formik.touched.role && formik.errors.role && (
@@ -370,7 +373,7 @@ const Register = () => {
               )}
             </FormControl>
             
-            {formik.values.role === 'TUTORADO' && (
+            {formik.values.role === 'ASESORADO' && (
               <FormControl 
                 fullWidth 
                 margin="normal"
@@ -408,7 +411,7 @@ const Register = () => {
               </FormControl>
             )}
             
-            {formik.values.role === 'TUTOR' && (
+            {formik.values.role === 'ASESOR' && (
               <FormControl 
                 fullWidth 
                 margin="normal"

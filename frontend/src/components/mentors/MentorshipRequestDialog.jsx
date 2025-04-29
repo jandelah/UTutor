@@ -99,7 +99,7 @@ const MentorshipRequestDialog = ({ open, onClose, mentor, onSuccess }) => {
       }}
     >
       <DialogTitle>
-        Solicitar Mentoría con {mentor?.name}
+        Solicitar Asesoría con {mentor?.name}
       </DialogTitle>
       
       <DialogContent dividers>
@@ -110,7 +110,7 @@ const MentorshipRequestDialog = ({ open, onClose, mentor, onSuccess }) => {
               ¡Solicitud Enviada!
             </Typography>
             <Typography variant="body1">
-              Tu solicitud ha sido enviada. El mentor te contactará pronto.
+              Tu solicitud ha sido enviada. El asesor te contactará pronto.
             </Typography>
           </Box>
         ) : (
@@ -146,13 +146,13 @@ const MentorshipRequestDialog = ({ open, onClose, mentor, onSuccess }) => {
               Áreas de enfoque
             </Typography>
             <Typography variant="body2" color="text.secondary" paragraph>
-              Selecciona las áreas en las que te gustaría recibir mentoría:
+              Selecciona las áreas en las que te gustaría recibir asesoría:
             </Typography>
             
             {/* Expertise areas from mentor */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Áreas de experiencia del mentor:
+                Áreas de experiencia del asesor:
               </Typography>
               {getExpertiseAreas().length > 0 ? (
                 getExpertiseAreas().map((area, index) => (

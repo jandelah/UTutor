@@ -104,7 +104,7 @@ const ProfileHeader = ({ user, profile, isMentor = false, isOwnProfile = true })
                     color="primary"
                     sx={{ mb: 1 }}
                   >
-                    {isMentor ? 'Solicitar Mentoría' : 'Ver Detalles'}
+                    {isMentor ? 'Solicitar Asesoría' : 'Ver Detalles'}
                   </Button>
                   <IconButton
                     onClick={handleMenuClick}
