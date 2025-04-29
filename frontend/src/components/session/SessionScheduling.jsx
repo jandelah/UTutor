@@ -13,7 +13,7 @@ import {
   School, Description, Close, Check,
   ArrowForward
 } from '@mui/icons-material';
-import { createSession } from '../../services/api/mentorshipService';
+import apiClient from '../../services/api/apiClient';
 
 const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
   const [open, setOpen] = useState(true);
@@ -46,6 +46,17 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
     'Patrones de diseño', 'Bases de datos', 'APIs RESTful',
     'Autenticación JWT', 'Formularios', 'Validación'
   ];
+  
+  // Create a session - similar to what would be in the mentorshipService.js file
+  const createSession = async (sessionData) => {
+    try {
+      const response = await apiClient.post('/sessions', sessionData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating session:', error);
+      throw error;
+    }
+  };
   
   const handleClose = () => {
     if (isSubmitting) return;
