@@ -1,3 +1,5 @@
+
+// Updated imports in Mentorships.jsx
 import { useState, useEffect } from 'react';
 import { 
   Container, Grid, Box, Paper, Typography, Tabs, Tab,
@@ -8,13 +10,34 @@ import {
 } from '@mui/material';
 import { 
   School, CalendarMonth, Chat, AccessTime, 
-  Add, MoreVert, Info, Check, Close
+  Add, MoreVert, Info, Check, Close, ArrowForward
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import SessionScheduling from '../components/session/SessionScheduling';
 import { getMentorships, updateMentorship } from '../services/api/mentorshipService';
 import { useAuth } from '../AuthContext';
+
+const [schedulingOpen, setSchedulingOpen] = useState(false);
+const [selectedMentorshipForScheduling, setSelectedMentorshipForScheduling] = useState(null);
+
+const handleScheduleSession = (mentorship) => {
+  setSelectedMentorshipForScheduling(mentorship);
+  setSchedulingOpen(true);
+};
+const handleCloseScheduling = () => {
+  setSchedulingOpen(false);
+  setSelectedMentorshipForScheduling(null);
+};
+const handleSessionScheduled = () => {
+  setSnackbar({
+    open: true,
+    message: 'Sesión programada exitosamente',
+    severity: 'success'
+  });
+  fetchMentorships(); // Refresh the mentorships data
+};
 
 const Mentorships = () => {
   const navigate = useNavigate();
@@ -196,77 +219,135 @@ const Mentorships = () => {
           {filteredMentorships.map(mentorship => (
             <Grid item xs={12} md={6} key={mentorship.id}>
               <Card elevation={2}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Avatar
-                        src={mentorship.tutor?.avatar_url}
-                        alt={mentorship.tutor?.name}
-                        sx={{ width: 50, height: 50, mr: 2 }}
-                      >
-                        {mentorship.tutor?.name?.charAt(0)}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" component="div">
-                          {mentorship.tutor?.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Rating value={mentorship.tutor?.rating || 0} precision={0.1} size="small" readOnly />
-                        </Box>
-                      </Box>
-                    </Box>
-                    <Chip
-                      label={
-                        mentorship.status === 'ACTIVE' ? 'Activa' : 
-                        mentorship.status === 'COMPLETED' ? 'Completada' : 
-                        mentorship.status === 'CANCELED' ? 'Cancelada' :
-                        mentorship.status === 'PENDING' ? 'Pendiente' :
-                        mentorship.status
-                      }
-                      color={
-                        mentorship.status === 'ACTIVE' ? 'success' : 
-                        mentorship.status === 'COMPLETED' ? 'default' : 
-                        mentorship.status === 'CANCELED' ? 'error' :
-                        mentorship.status === 'PENDING' ? 'warning' :
-                        'default'
-                      }
-                      size="small"
-                    />
-                  </Box>
-                  
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      <CalendarMonth fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                      Inicio: {formatDate(mentorship.start_date)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <School fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                      {mentorship.completedSessions || 0} sesiones completadas
-                    </Typography>
-                    {mentorship.status === 'ACTIVE' && (
-                      <Typography variant="body2" color="text.secondary">
-                        <AccessTime fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-                        Próxima sesión: No programada
-                      </Typography>
-                    )}
-                  </Box>
-                  
-                  <Typography variant="subtitle2" gutterBottom>
-                    Áreas de enfoque
-                  </Typography>
-                  <Box>
-                    {mentorship.focus_areas?.map((area, index) => (
-                      <Chip
-                        key={index}
-                        label={area}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                        sx={{ mr: 0.5, mb: 0.5 }}
-                      />
-                    ))}
-                  </Box>
-                </CardContent>
+              // Updated Card Content section in Mentorships.jsx
+<CardContent>
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <Box sx={{ width: '100%' }}>
+      {/* Mentorship participants */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        {/* Tutor information */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ position: 'relative' }}>
+            <Avatar
+              src={mentorship.tutor?.avatar_url}
+              alt={mentorship.tutor?.name}
+              sx={{ width: 50, height: 50, mr: 2, border: '2px solid', borderColor: 'primary.main' }}
+            >
+              {mentorship.tutor?.name?.charAt(0)}
+            </Avatar>
+            <Chip
+              label="Asesor"
+              size="small"
+              color="primary"
+              sx={{ 
+                position: 'absolute', 
+                top: -10, 
+                left: -10, 
+                fontSize: '0.625rem', 
+                height: '20px' 
+              }}
+            />
+          </Box>
+          <Box>
+            <Typography variant="subtitle1" component="div">
+              {mentorship.tutor?.name}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Rating value={mentorship.tutor?.rating || 0} precision={0.1} size="small" readOnly />
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Arrow between tutor and tutorado */}
+        <ArrowForward sx={{ mx: 1, color: 'text.secondary' }} />
+
+        {/* Tutorado information */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ position: 'relative' }}>
+            <Avatar
+              src={mentorship.tutorado?.avatar_url}
+              alt={mentorship.tutorado?.name}
+              sx={{ width: 50, height: 50, mr: 2, border: '2px solid', borderColor: 'secondary.main' }}
+            >
+              {mentorship.tutorado?.name?.charAt(0)}
+            </Avatar>
+            <Chip
+              label="Asesorado"
+              size="small"
+              color="secondary"
+              sx={{ 
+                position: 'absolute', 
+                top: -10, 
+                left: -10, 
+                fontSize: '0.625rem', 
+                height: '20px' 
+              }}
+            />
+          </Box>
+          <Box>
+            <Typography variant="subtitle1" component="div">
+              {mentorship.tutorado?.name}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Status chip */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+        <Chip
+          label={
+            mentorship.status === 'ACTIVE' ? 'Activa' : 
+            mentorship.status === 'COMPLETED' ? 'Completada' : 
+            mentorship.status === 'CANCELED' ? 'Cancelada' :
+            mentorship.status === 'PENDING' ? 'Pendiente' :
+            mentorship.status
+          }
+          color={
+            mentorship.status === 'ACTIVE' ? 'success' : 
+            mentorship.status === 'COMPLETED' ? 'default' : 
+            mentorship.status === 'CANCELED' ? 'error' :
+            mentorship.status === 'PENDING' ? 'warning' :
+            'default'
+          }
+          size="small"
+        />
+      </Box>
+      
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          <CalendarMonth fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
+          Inicio: {formatDate(mentorship.start_date)}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          <School fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
+          {mentorship.completedSessions || 0} sesiones completadas
+        </Typography>
+        {mentorship.status === 'ACTIVE' && (
+          <Typography variant="body2" color="text.secondary">
+            <AccessTime fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
+            Próxima sesión: {mentorship.nextSession ? formatDate(mentorship.nextSession.date) : 'No programada'}
+          </Typography>
+        )}
+      </Box>
+      
+      <Typography variant="subtitle2" gutterBottom>
+        Áreas de enfoque
+      </Typography>
+      <Box>
+        {mentorship.focus_areas?.map((area, index) => (
+          <Chip
+            key={index}
+            label={area}
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{ mr: 0.5, mb: 0.5 }}
+          />
+        ))}
+      </Box>
+    </Box>
+  </Box>
+</CardContent>
                 
                 <Divider />
                 
@@ -286,8 +367,7 @@ const Mentorships = () => {
                         size="small" 
                         color="secondary"
                         startIcon={<CalendarMonth />}
-                        component={Link}
-                        to={`/sessions/new?mentorshipId=${mentorship.id}`}
+                        onClick={() => handleScheduleSession(mentorship)}
                       >
                         Agendar
                       </Button>
@@ -509,7 +589,14 @@ const Mentorships = () => {
           </>
         )}
       </Dialog>
-      
+      {/* Add the Session Scheduling Dialog here */}
+      {schedulingOpen && selectedMentorshipForScheduling && (
+        <SessionScheduling
+          mentorship={selectedMentorshipForScheduling}
+          onSuccess={handleSessionScheduled}
+          onClose={handleCloseScheduling}
+        />
+      )}
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
