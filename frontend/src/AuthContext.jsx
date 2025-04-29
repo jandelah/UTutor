@@ -36,14 +36,56 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (email, password) => {
     try {
-      const response = await apiClient.post('/users/login', { email, password });
-      const { token, user } = response.data;
+      console.log('Attempting login for:', email);
       
-      localStorage.setItem('token', token);
-      setCurrentUser(user);
-      return user;
+      // Make the API call
+      const response = await apiClient.post('/users/login', { email, password });
+      console.log('Login response:', response);
+      
+      // Check if the response has the expected structure
+      // Using optional chaining and fallbacks for safety
+      if (response && response.data) {
+        // The response looks good, extract the token and user data
+        const token = response.data.token || response.data.access_token;
+        const user = response.data.user || response.data.data;
+        
+        if (!token) {
+          console.error('No token found in response:', response.data);
+          throw new Error('Authentication failed: No token received');
+        }
+        
+        if (!user) {
+          console.error('No user data found in response:', response.data);
+          throw new Error('Authentication failed: No user data received');
+        }
+        
+        // Store token in local storage
+        localStorage.setItem('token', token);
+        
+        // Set current user
+        setCurrentUser(user);
+        
+        return user;
+      } else {
+        console.error('Invalid response format:', response);
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error logging in');
+      console.error('Login error:', error);
+      
+      // Check if this is a server response error or a client-side error
+      if (error.response) {
+        // Server responded with an error status code
+        console.error('Server error response:', error.response.data);
+        throw new Error(error.response.data.message || 'Invalid credentials. Please try again.');
+      } else if (error.request) {
+        // Request was made but no response received
+        console.error('No response received:', error.request);
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        // Something else caused the error
+        throw error;
+      }
     }
   };
   

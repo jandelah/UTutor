@@ -2,7 +2,6 @@
 
 import axios from 'axios';
 
-// Set the API URL directly rather than relying on environment variables
 const API_URL = 'https://ututor-api.onrender.com';
 
 const apiClient = axios.create({
@@ -10,86 +9,66 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  // Add timeout to handle potential slow cold starts on Render free tier
-  timeout: 15000
+  // Don't transform the response - we'll handle it manually in our code
+  transformResponse: [(data) => {
+    // Keep the original response data
+    return data;
+  }]
 });
 
-// Request interceptor with improved error handling
+// Add token to requests if available
 apiClient.interceptors.request.use(
   (config) => {
-    // Add token for authentication if available
+    // Log the request in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, config.data);
+    }
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    
-    // Log requests in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`API Request: ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
-    }
-    
     return config;
   },
   (error) => {
-    console.error('API Request Error:', error);
+    console.error('Request error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor with better error handling
+// Process responses
 apiClient.interceptors.response.use(
   (response) => {
-    return response.data; // Return just the data portion for convenience
-  },
-  (error) => {
-    // Create a user-friendly error message
-    let errorMessage = 'An unexpected error occurred';
-    
-    if (error.response) {
-      // Server responded with an error status code
-      console.error(
-        `API Error ${error.response.status}:`, 
-        error.response.data.message || error.response.statusText
-      );
-      
-      errorMessage = error.response.data.message || 
-                     `Server error: ${error.response.status}`;
-                     
-      // Handle specific status codes
-      switch (error.response.status) {
-        case 401:
-          // Unauthorized - clear auth and redirect to login
-          localStorage.removeItem('token');
-          // Could add redirect logic here
-          errorMessage = 'Your session has expired. Please log in again.';
-          break;
-        case 404:
-          errorMessage = `The requested resource was not found: ${error.config.url}`;
-          break;
-        case 422:
-          errorMessage = 'Validation failed. Please check your input.';
-          break;
+    // For successful responses, parse JSON if it's a string
+    if (typeof response.data === 'string' && response.data.trim()) {
+      try {
+        response.data = JSON.parse(response.data);
+      } catch (e) {
+        console.warn('Failed to parse response as JSON:', e);
       }
-    } else if (error.request) {
-      // Request was made but no response received (network issue)
-      console.error('Network Error: No response received', error.request);
-      errorMessage = 'Unable to connect to server. Please check your internet connection.';
-      
-      // Check if this might be a cold start delay on Render free tier
-      if (error.code === 'ECONNABORTED') {
-        errorMessage = 'Server is taking too long to respond. It might be starting up after inactivity.';
-      }
-    } else {
-      // Something else caused the error
-      console.error('API Client Error:', error.message);
     }
     
-    // Create a new error with the friendly message
-    const enhancedError = new Error(errorMessage);
-    enhancedError.originalError = error;
-    enhancedError.response = error.response;
+    // Log the response in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`API Response: ${response.status}`, response.data);
+    }
     
-    return Promise.reject(enhancedError);
+    return response;
+  },
+  (error) => {
+    // For errors, add more context and better logging
+    if (error.response) {
+      // The request was made and the server responded with an error status
+      console.error(`API Error ${error.response.status}:`, error.response.data);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('Network Error (no response):', error.request);
+    } else {
+      // Something happened in setting up the request
+      console.error('Request Error:', error.message);
+    }
+    
+    return Promise.reject(error);
   }
 );
 
