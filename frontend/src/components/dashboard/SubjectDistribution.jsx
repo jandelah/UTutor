@@ -23,7 +23,7 @@ const SubjectDistribution = ({ data = [] }) => {
   });
   
   useEffect(() => {
-    if (data.length > 0) {
+    if (Array.isArray(data) && data.length > 0) {
       // Colores para el gráfico
       const colors = [
         theme.palette.primary.main,
@@ -45,6 +45,19 @@ const SubjectDistribution = ({ data = [] }) => {
           },
         ],
       });
+    } else {
+      // Set empty chart data when no data is available
+      setChartData({
+        labels: ['No hay datos'],
+        datasets: [
+          {
+            data: [1],
+            backgroundColor: ['#e0e0e0'],
+            borderColor: ['#e0e0e0'],
+            borderWidth: 1,
+          },
+        ],
+      });
     }
   }, [data, theme]);
   
@@ -62,6 +75,10 @@ const SubjectDistribution = ({ data = [] }) => {
       tooltip: {
         callbacks: {
           label: function(context) {
+            if (!Array.isArray(data) || data.length === 0) {
+              return 'No hay datos disponibles';
+            }
+            
             const label = context.label || '';
             const value = context.raw || 0;
             const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
@@ -78,9 +95,25 @@ const SubjectDistribution = ({ data = [] }) => {
       <Typography variant="h6" gutterBottom>
         Distribución por Materia
       </Typography>
-      <Box sx={{ height: 260, mt: 2, display: 'flex', justifyContent: 'center' }}>
-        <Pie data={chartData} options={options} />
-      </Box>
+      
+      {Array.isArray(data) && data.length > 0 ? (
+        <Box sx={{ height: 260, mt: 2, display: 'flex', justifyContent: 'center' }}>
+          <Pie data={chartData} options={options} />
+        </Box>
+      ) : (
+        <Box sx={{ 
+          height: 260, 
+          mt: 2, 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          color: 'text.secondary'
+        }}>
+          <Typography variant="body1">
+            No hay datos disponibles para mostrar
+          </Typography>
+        </Box>
+      )}
     </Paper>
   );
 };

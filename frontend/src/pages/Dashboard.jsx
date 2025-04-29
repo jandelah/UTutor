@@ -18,8 +18,18 @@ import { useAuth } from '../AuthContext.jsx';
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({
+    activeTutorias: 0,
+    completedSessions: 0,
+    upcomingSessions: 0,
+    averageTutorRating: 0,
+    tutoriasBySubject: [],
+    monthlySessionsData: [],
+    topTutores: [],
+    recentResources: []
+  });
   const [upcomingSessions, setUpcomingSessions] = useState([]);
+  const [error, setError] = useState(null);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -30,10 +40,22 @@ const Dashboard = () => {
           getUpcomingSessions()
         ]);
         
-        setStats(statsData);
-        setUpcomingSessions(sessionsData);
+        // Ensure stats data has default values for all properties
+        setStats({
+          activeTutorias: statsData?.activeTutorias ?? 0,
+          completedSessions: statsData?.completedSessions ?? 0,
+          upcomingSessions: statsData?.upcomingSessions ?? 0,
+          averageTutorRating: statsData?.averageTutorRating ?? 0,
+          tutoriasBySubject: statsData?.tutoriasBySubject ?? [],
+          monthlySessionsData: statsData?.monthlySessionsData ?? [],
+          topTutores: statsData?.topTutores ?? [],
+          recentResources: statsData?.recentResources ?? []
+        });
+        
+        setUpcomingSessions(Array.isArray(sessionsData) ? sessionsData : []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        setError('Hubo un error al cargar los datos del dashboard. Por favor, intenta de nuevo más tarde.');
       } finally {
         setLoading(false);
       }
@@ -46,10 +68,24 @@ const Dashboard = () => {
     return <LoadingSpinner message="Cargando dashboard..." />;
   }
   
+  if (error) {
+    return (
+      <Container maxWidth="lg">
+        <PageHeader 
+          title={`Bienvenido, ${currentUser?.name?.split(' ')[0] || 'Usuario'}`}
+          subtitle="Visualiza el progreso y estado de tus asesorías"
+        />
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
+  
   return (
     <Container maxWidth="lg">
       <PageHeader 
-        title={`Bienvenido, ${currentUser?.name.split(' ')[0]}`}
+        title={`Bienvenido, ${currentUser?.name?.split(' ')[0] || 'Usuario'}`}
         subtitle="Visualiza el progreso y estado de tus asesorías"
       />
       
@@ -58,7 +94,7 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title="Asesorías Activas" 
-            value={stats?.activeTutorias ?? 0}  
+            value={stats.activeTutorias}
             icon={<Group />}
             color="primary"
           />
@@ -74,7 +110,7 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title="Próximas Sesiones" 
-            value={stats?.upcomingSessions ?? 0}  
+            value={stats.upcomingSessions}
             icon={<CalendarMonth />}
             color="warning"
           />
@@ -82,7 +118,7 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
             title="Calificación Promedio" 
-            value={stats.averageTutorRating.toFixed(1)} 
+            value={typeof stats.averageTutorRating === 'number' ? stats.averageTutorRating.toFixed(1) : '0.0'} 
             icon={<Assessment />}
             color="info"
           />
@@ -90,12 +126,12 @@ const Dashboard = () => {
         
         {/* Gráfica de sesiones mensuales */}
         <Grid item xs={12} md={8}>
-          <SessionsChart data={stats.monthlySessionsData} />
+          <SessionsChart data={stats.monthlySessionsData || []} />
         </Grid>
         
         {/* Distribución por materia */}
         <Grid item xs={12} md={4}>
-          <SubjectDistribution data={stats.tutoriasBySubject} />
+          <SubjectDistribution data={stats.tutoriasBySubject || []} />
         </Grid>
         
         {/* Próximas sesiones */}
@@ -105,12 +141,12 @@ const Dashboard = () => {
               ? upcomingSessions.slice(0, 3) 
               : [] 
             } 
-            />  
+          />  
         </Grid>
         
         {/* Asesores destacados */}
         <Grid item xs={12} md={4}>
-          <TopMentorsList mentors={stats.topTutores} />
+          <TopMentorsList mentors={stats.topTutores || []} />
         </Grid>
         
         {/* Sección de recursos recientes */}
@@ -119,21 +155,27 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Recursos Populares
             </Typography>
-            <Grid container spacing={2}>
-              {stats.recentResources.map((resource, index) => (
-                <Grid item xs={12} md={4} key={index}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <MenuBook color="primary" sx={{ mr: 1 }} />
-                    <Box>
-                      <Typography variant="body1">{resource.title}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {resource.downloads} descargas
-                      </Typography>
+            {Array.isArray(stats.recentResources) && stats.recentResources.length > 0 ? (
+              <Grid container spacing={2}>
+                {stats.recentResources.map((resource, index) => (
+                  <Grid item xs={12} md={4} key={index}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <MenuBook color="primary" sx={{ mr: 1 }} />
+                      <Box>
+                        <Typography variant="body1">{resource.title}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {resource.downloads} descargas
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Typography variant="body1" color="text.secondary">
+                No hay recursos disponibles.
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>
