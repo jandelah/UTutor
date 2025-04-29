@@ -10,7 +10,6 @@ export default defineConfig(({ command }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       emptyOutDir: true,
-      // Agregar referencia directa a donde deben ir los assets
       rollupOptions: {
         output: {
           manualChunks: undefined,
@@ -19,6 +18,10 @@ export default defineConfig(({ command }) => {
           assetFileNames: 'assets/[name].[hash].[ext]'
         }
       }
+    },
+    // Add this to make environment variables available
+    define: {
+      'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL)
     }
   }
 });

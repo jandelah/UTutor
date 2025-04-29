@@ -1,78 +1,70 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { MOCK_USERS } from './services/mockData';
+import apiClient from './services/api/apiClient';
 
-// Create context
 export const AuthContext = createContext();
 
-// Custom hook to use the auth context
 export const useAuth = () => {
   return useContext(AuthContext);
 };
 
-// Provider component
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   
   // Check for saved user on component mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchUser(token);
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
   
+  const fetchUser = async (token) => {
+    try {
+      const response = await apiClient.get('/users/me');
+      setCurrentUser(response.data.user);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      localStorage.removeItem('token');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // Login function
-  const login = (email, password) => {
-    // In a real app, this would make an API call
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const user = MOCK_USERS.find(user => user.email === email);
-        
-        if (user) {
-          setCurrentUser(user);
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          resolve(user);
-        } else {
-          reject(new Error('Credenciales inválidas'));
-        }
-      }, 500);
-    });
+  const login = async (email, password) => {
+    try {
+      const response = await apiClient.post('/users/login', { email, password });
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      setCurrentUser(user);
+      return user;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error logging in');
+    }
   };
   
   // Register function
-  const register = (userData) => {
-    // In a real app, this would make an API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Create new user with ID based on array length
-        const newUser = {
-          id: MOCK_USERS.length + 1,
-          name: `${userData.firstName} ${userData.lastName}`,
-          email: userData.email,
-          avatar: `https://i.pravatar.cc/150?img=${MOCK_USERS.length + 10}`,
-          career: userData.career,
-          semester: parseInt(userData.semester),
-          role: userData.role
-        };
-        
-        // Add user to mock data (in a real app this would be handled by backend)
-        MOCK_USERS.push(newUser);
-        
-        // Set as current user
-        setCurrentUser(newUser);
-        localStorage.setItem('currentUser', JSON.stringify(newUser));
-        
-        resolve(newUser);
-      }, 500);
-    });
+  const register = async (userData) => {
+    try {
+      const response = await apiClient.post('/users/register', userData);
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      setCurrentUser(user);
+      return user;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error registering');
+    }
   };
   
   // Logout function
   const logout = () => {
+    localStorage.removeItem('token');
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
   };
   
   const value = {
