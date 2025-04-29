@@ -50,37 +50,63 @@ export const AuthProvider = ({ children }) => {
   // Register function
   const register = async (userData) => {
     try {
-      // Combine firstName and lastName into a single name field
+      // Format the data as expected by the backend
       const apiData = {
         email: userData.email,
         password: userData.password,
-        // Create a full name from firstName and lastName
-        name: `${userData.firstName} ${userData.lastName}`,
+        name: userData.firstName && userData.lastName 
+          ? `${userData.firstName} ${userData.lastName}` 
+          : userData.name || '',
         career: userData.career,
         semester: userData.semester,
-        role: userData.role,
-        // Include any additional fields needed by the backend
+        role: userData.role
       };
       
-      // Log what we're sending to help debug
       console.log('Sending registration data:', apiData);
       
+      // Make the API call
       const response = await apiClient.post('/users/register', apiData);
+      console.log('Registration response:', response);
       
-      // Store token if it exists in the response
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      // Check if the response has the expected structure
+      // Using optional chaining and fallbacks for safety
+      let user, token;
+      
+      if (response && response.data) {
+        // Try to get user data from different possible response formats
+        user = response.data.user || response.data.data || response.data;
+        
+        // Try to get token from different possible formats
+        token = response.data.token || response.data.access_token;
+        
+        // Store token if we found one
+        if (token) {
+          localStorage.setItem('token', token);
+        }
+        
+        // Set current user if we found user data
+        if (user) {
+          setCurrentUser(user);
+        } else {
+          console.warn('User data not found in response, using submitted data');
+          // Create a fallback user object from the submitted data
+          setCurrentUser({
+            email: apiData.email,
+            name: apiData.name,
+            career: apiData.career,
+            semester: apiData.semester,
+            role: apiData.role
+          });
+        }
+        
+        // Return whatever user data we have
+        return user || apiData;
+      } else {
+        throw new Error('Invalid response format from server');
       }
-      
-      // Set current user
-      if (response.data && response.data.user) {
-        setCurrentUser(response.data.user);
-      }
-      
-      return response.data.user;
     } catch (error) {
       console.error('Registration error:', error);
-      throw new Error(error.response?.data?.message || 'Error registering');
+      throw new Error(error.response?.data?.message || 'Error registering user');
     }
   };
   
