@@ -50,13 +50,36 @@ export const AuthProvider = ({ children }) => {
   // Register function
   const register = async (userData) => {
     try {
-      const response = await apiClient.post('/users/register', userData);
-      const { token, user } = response.data;
+      // Combine firstName and lastName into a single name field
+      const apiData = {
+        email: userData.email,
+        password: userData.password,
+        // Create a full name from firstName and lastName
+        name: `${userData.firstName} ${userData.lastName}`,
+        career: userData.career,
+        semester: userData.semester,
+        role: userData.role,
+        // Include any additional fields needed by the backend
+      };
       
-      localStorage.setItem('token', token);
-      setCurrentUser(user);
-      return user;
+      // Log what we're sending to help debug
+      console.log('Sending registration data:', apiData);
+      
+      const response = await apiClient.post('/users/register', apiData);
+      
+      // Store token if it exists in the response
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      
+      // Set current user
+      if (response.data && response.data.user) {
+        setCurrentUser(response.data.user);
+      }
+      
+      return response.data.user;
     } catch (error) {
+      console.error('Registration error:', error);
       throw new Error(error.response?.data?.message || 'Error registering');
     }
   };
