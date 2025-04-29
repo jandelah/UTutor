@@ -9,6 +9,7 @@ import Search from './pages/Search';
 import Mentorships from './pages/Mentorships';  // Mantenemos el nombre original del archivo
 import Sessions from './pages/Sessions';
 import Resources from './pages/Resources';
+import ResourceUpload from './pages/ResourceUpload';
 import Profile from './pages/Profile';
 
 // Páginas públicas
@@ -65,6 +66,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Layout><Resources /></Layout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/resources/upload" 
+        element={
+          <ProtectedRoute>
+            <Layout><ResourceUpload /></Layout>
           </ProtectedRoute>
         } 
       />
