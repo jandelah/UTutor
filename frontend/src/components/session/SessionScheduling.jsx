@@ -1,21 +1,18 @@
 import { useState } from 'react';
 import {
-  Box, Paper, Typography, Grid, Button, TextField,
+  Box, Typography, Grid, Button, TextField,
   FormControl, FormControlLabel, RadioGroup, Radio,
   InputLabel, Select, MenuItem, Chip, Dialog, 
   DialogTitle, DialogContent, DialogActions, Alert,
   LinearProgress, FormHelperText, Divider, IconButton,
-  List, ListItem, ListItemIcon, ListItemText, Avatar
+  List, ListItem, ListItemIcon, ListItemText, Avatar,
+  CircularProgress
 } from '@mui/material';
 import { 
-  CalendarMonth, Schedule, LocationOn, VideoCall, 
-  SportsEsports, School, Description, Close, Check,
-  Person, ArrowForward
+  CalendarMonth, LocationOn, VideoCall, 
+  School, Description, Close, Check,
+  ArrowForward
 } from '@mui/icons-material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
-import { es } from 'date-fns/locale';
-import { format, addHours, addDays, isBefore, isAfter } from 'date-fns';
 import { createSession } from '../../services/api/mentorshipService';
 
 const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
@@ -26,15 +23,12 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   
-  const currentDate = new Date();
-  const tomorrow = addDays(currentDate, 1);
-  
   // Form state
   const [formValues, setFormValues] = useState({
     title: '',
-    date: addDays(new Date(), 1),
-    startTime: addHours(new Date().setHours(15, 0, 0, 0), 24),
-    endTime: addHours(new Date().setHours(16, 30, 0, 0), 24),
+    date: new Date().toISOString().split('T')[0], // Today in YYYY-MM-DD format
+    startTime: '15:00',
+    endTime: '16:30',
     mode: 'VIRTUAL',
     location: '',
     meetingLink: '',
@@ -72,44 +66,6 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
         ...formErrors,
         [name]: null
       });
-    }
-  };
-
-  const handleDateChange = (newDate) => {
-    setFormValues({
-      ...formValues,
-      date: newDate
-    });
-    
-    // Clear error for this field
-    if (formErrors.date) {
-      setFormErrors({
-        ...formErrors,
-        date: null
-      });
-    }
-  };
-
-  const handleTimeChange = (field, newTime) => {
-    setFormValues({
-      ...formValues,
-      [field]: newTime
-    });
-    
-    // Clear error for this field
-    if (formErrors[field]) {
-      setFormErrors({
-        ...formErrors,
-        [field]: null
-      });
-    }
-    
-    // If changing startTime, adjust endTime if not yet set
-    if (field === 'startTime' && !formErrors.endTime) {
-      setFormValues(prev => ({
-        ...prev,
-        endTime: addHours(newTime, 1.5)
-      }));
     }
   };
   
@@ -171,8 +127,6 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
     // Date validation
     if (!formValues.date) {
       errors.date = 'La fecha es requerida';
-    } else if (isBefore(formValues.date, tomorrow)) {
-      errors.date = 'La fecha debe ser al menos mañana';
     }
     
     // Time validation
@@ -182,7 +136,7 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
     
     if (!formValues.endTime) {
       errors.endTime = 'La hora de finalización es requerida';
-    } else if (formValues.startTime && !isAfter(formValues.endTime, formValues.startTime)) {
+    } else if (formValues.startTime >= formValues.endTime) {
       errors.endTime = 'La hora de finalización debe ser después de la hora de inicio';
     }
     
@@ -221,9 +175,9 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
       const sessionData = {
         mentorship_id: mentorship.id,
         title: formValues.title,
-        date: format(formValues.date, 'yyyy-MM-dd'),
-        start_time: format(formValues.startTime, 'HH:mm'),
-        end_time: format(formValues.endTime, 'HH:mm'),
+        date: formValues.date,
+        start_time: formValues.startTime,
+        end_time: formValues.endTime,
         mode: formValues.mode,
         location: formValues.mode === 'VIRTUAL' 
           ? formValues.meetingLink 
@@ -253,6 +207,18 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
   
   return (
@@ -360,22 +326,21 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
               </Grid>
               
               <Grid item xs={12} sm={6}>
-                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-                  <DatePicker
-                    label="Fecha"
-                    value={formValues.date}
-                    onChange={handleDateChange}
-                    disablePast
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!formErrors.date,
-                        helperText: formErrors.date,
-                        required: true
-                      }
-                    }}
-                  />
-                </LocalizationProvider>
+                <TextField
+                  fullWidth
+                  id="date"
+                  name="date"
+                  label="Fecha"
+                  type="date"
+                  value={formValues.date}
+                  onChange={handleInputChange}
+                  error={!!formErrors.date}
+                  helperText={formErrors.date}
+                  required
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
               </Grid>
               
               <Grid item xs={12} sm={6}>
@@ -411,40 +376,39 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
               </Grid>
               
               <Grid item xs={12} sm={6}>
-                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-                  <TimePicker
-                    label="Hora de inicio"
-                    value={formValues.startTime}
-                    onChange={(newValue) => handleTimeChange('startTime', newValue)}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!formErrors.startTime,
-                        helperText: formErrors.startTime,
-                        required: true
-                      }
-                    }}
-                  />
-                </LocalizationProvider>
+                <TextField
+                  fullWidth
+                  id="startTime"
+                  name="startTime"
+                  label="Hora de inicio"
+                  type="time"
+                  value={formValues.startTime}
+                  onChange={handleInputChange}
+                  error={!!formErrors.startTime}
+                  helperText={formErrors.startTime}
+                  required
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
               </Grid>
               
               <Grid item xs={12} sm={6}>
-                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-                  <TimePicker
-                    label="Hora de finalización"
-                    value={formValues.endTime}
-                    onChange={(newValue) => handleTimeChange('endTime', newValue)}
-                    minTime={formValues.startTime}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!formErrors.endTime,
-                        helperText: formErrors.endTime,
-                        required: true
-                      }
-                    }}
-                  />
-                </LocalizationProvider>
+                <TextField
+                  fullWidth
+                  id="endTime"
+                  name="endTime"
+                  label="Hora de finalización"
+                  type="time"
+                  value={formValues.endTime}
+                  onChange={handleInputChange}
+                  error={!!formErrors.endTime}
+                  helperText={formErrors.endTime}
+                  required
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
               </Grid>
               
               {formValues.mode === 'VIRTUAL' ? (
@@ -618,7 +582,7 @@ const SessionScheduling = ({ mentorship, onSuccess, onClose }) => {
               </ListItemIcon>
               <ListItemText 
                 primary="Fecha y Hora" 
-                secondary={`${format(formValues.date, 'EEEE, d MMMM yyyy', { locale: es })} | ${format(formValues.startTime, 'HH:mm')} - ${format(formValues.endTime, 'HH:mm')}`}
+                secondary={`${formatDate(formValues.date)} | ${formValues.startTime} - ${formValues.endTime}`}
               />
             </ListItem>
             
