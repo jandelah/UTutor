@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { 
   Paper, Typography, List, ListItem, ListItemText, Box,
   Chip, IconButton, Tooltip, Divider
@@ -12,13 +11,19 @@ import { Link } from 'react-router-dom';
 const UpcomingSessions = ({ sessions = [] }) => {
   // Función para formatear fecha
   const formatDate = (dateString) => {
-    const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    return new Date(dateString).toLocaleDateString('es-MX', options);
+    if (!dateString) return '';
+    try {
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      return new Date(dateString).toLocaleDateString('es-MX', options);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString; // Return original string if parsing fails
+    }
   };
   
   // Función para formatear hora
   const formatTime = (timeString) => {
-    return timeString;
+    return timeString || '';
   };
   
   return (
@@ -39,7 +44,7 @@ const UpcomingSessions = ({ sessions = [] }) => {
         </Tooltip>
       </Box>
       
-      {sessions.length === 0 ? (
+      {!Array.isArray(sessions) || sessions.length === 0 ? (
         <Box sx={{ py: 4, textAlign: 'center' }}>
           <Event sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
           <Typography color="text.secondary">
@@ -49,7 +54,7 @@ const UpcomingSessions = ({ sessions = [] }) => {
       ) : (
         <List sx={{ pt: 0 }}>
           {sessions.map((session, index) => (
-            <Box key={session.id}>
+            <Box key={session?.id || index}>
               {index > 0 && <Divider sx={{ my: 1 }} />}
               <ListItem 
                 sx={{ px: 0, py: 1.5 }}
@@ -58,7 +63,7 @@ const UpcomingSessions = ({ sessions = [] }) => {
                     <IconButton 
                       edge="end" 
                       component={Link} 
-                      to={`/sessions/${session.id}`}
+                      to={session?.id ? `/sessions/${session.id}` : '/sessions'}
                       size="small"
                     >
                       <OpenInNew fontSize="small" />
@@ -69,7 +74,7 @@ const UpcomingSessions = ({ sessions = [] }) => {
                 <ListItemText
                   primary={
                     <Typography variant="subtitle1" component="div" fontWeight={500}>
-                      {session.title}
+                      {session?.title || 'Sesión sin título'}
                     </Typography>
                   }
                   secondary={
@@ -77,23 +82,23 @@ const UpcomingSessions = ({ sessions = [] }) => {
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                         <Event fontSize="small" color="action" sx={{ mr: 1 }} />
                         <Typography variant="body2" color="text.secondary">
-                          {formatDate(session.date)} • {formatTime(session.startTime)} - {formatTime(session.endTime)}
+                          {formatDate(session?.date)} • {formatTime(session?.startTime)} - {formatTime(session?.endTime)}
                         </Typography>
                       </Box>
                       
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {session.mode === 'VIRTUAL' ? (
+                        {session?.mode === 'VIRTUAL' ? (
                           <VideoCameraFront fontSize="small" color="primary" sx={{ mr: 1 }} />
                         ) : (
                           <LocationOn fontSize="small" color="error" sx={{ mr: 1 }} />
                         )}
                         <Typography variant="body2" color="text.secondary">
-                          {session.location}
+                          {session?.location || 'Ubicación no especificada'}
                         </Typography>
                       </Box>
                       
                       <Box sx={{ mt: 1 }}>
-                        {session.topics.map((topic, idx) => (
+                        {Array.isArray(session?.topics) && session.topics.map((topic, idx) => (
                           <Chip
                             key={idx}
                             label={topic}

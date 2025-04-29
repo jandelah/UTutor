@@ -6,11 +6,11 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  Filler,  
   LineElement,
   Title,
   Tooltip,
   Legend,
+  Filler
 } from 'chart.js';
 
 // Registrar los componentes de ChartJS
@@ -19,10 +19,10 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Filler, 
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 const SessionsChart = ({ data = [] }) => {
@@ -33,13 +33,28 @@ const SessionsChart = ({ data = [] }) => {
   });
   
   useEffect(() => {
-    if (data.length > 0) {
+    if (Array.isArray(data) && data.length > 0) {
       setChartData({
-        labels: data.map(item => item.month),
+        labels: data.map(item => item.month || ''),
         datasets: [
           {
             label: 'Sesiones Mensuales',
-            data: data.map(item => item.sessions),
+            data: data.map(item => item.sessions || 0),
+            borderColor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.light,
+            tension: 0.3,
+            fill: true
+          }
+        ]
+      });
+    } else {
+      // Default empty chart
+      setChartData({
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+        datasets: [
+          {
+            label: 'Sesiones Mensuales',
+            data: [0, 0, 0, 0, 0, 0],
             borderColor: theme.palette.primary.main,
             backgroundColor: theme.palette.primary.light,
             tension: 0.3,
