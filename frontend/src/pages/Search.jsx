@@ -1,69 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Container, Grid, TextField, Button, Typography, 
   Card, CardContent, CardActions, Avatar, Chip,
   InputAdornment, FormControl, InputLabel, Select, MenuItem,
-  Rating, Box, Divider, Paper 
+  Rating, Box, Divider, Paper, CircularProgress, Alert, Snackbar
 } from '@mui/material';
 import { Search as SearchIcon, FilterList, School } from '@mui/icons-material';
 import PageHeader from '../components/common/PageHeader';
+import { getMentors } from '../services/api/userService';
+import { createMentorship } from '../services/api/mentorshipService';
+import { useAuth } from '../AuthContext';
+import MentorshipRequestDialog from '../components/mentors/MentorshipRequestDialog';
 
 const Search = () => {
+  const { currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     subject: '',
     availability: '',
     rating: ''
   });
+  const [mentors, setMentors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info'
+  });
   
-  // Datos de ejemplo para mentores
-  const mentors = [
-    {
-      id: 1,
-      name: 'Ana García',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-      expertise: ['Programación Web', 'JavaScript', 'React'],
-      rating: 4.8,
-      sessions: 24,
-      availability: ['Lunes', 'Miércoles', 'Viernes'],
-      bio: 'Estudiante de último semestre con experiencia en desarrollo web y aplicaciones móviles. Me apasiona enseñar y compartir conocimientos.'
-    },
-    {
-      id: 2,
-      name: 'Carlos Mendoza',
-      avatar: 'https://i.pravatar.cc/150?img=2',
-      expertise: ['Algoritmos', 'Estructura de Datos', 'Java'],
-      rating: 4.6,
-      sessions: 18,
-      availability: ['Martes', 'Jueves'],
-      bio: 'Entusiasta de la programación con sólidos conocimientos en algoritmos y estructuras de datos.'
-    },
-    {
-      id: 5,
-      name: 'Sofía Ramírez',
-      avatar: 'https://i.pravatar.cc/150?img=5',
-      expertise: ['Diseño UX/UI', 'Desarrollo móvil', 'Figma'],
-      rating: 4.9,
-      sessions: 32,
-      availability: ['Lunes', 'Miércoles', 'Viernes'],
-      bio: 'Especializada en diseño de experiencias de usuario y desarrollo móvil.'
+  useEffect(() => {
+    fetchMentors();
+  }, []);
+  
+  const fetchMentors = async () => {
+    try {
+      setLoading(true);
+      const data = await getMentors();
+      setMentors(data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching mentors:", err);
+      setError("Failed to load mentors. Please try again later.");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
   
   // Filtrar mentores según términos de búsqueda y filtros
   const filteredMentors = mentors.filter(mentor => {
     const matchesSearch = searchTerm === '' || 
       mentor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mentor.expertise.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+      (mentor.expertise_areas && mentor.expertise_areas.some(skill => 
+        skill.area.toLowerCase().includes(searchTerm.toLowerCase())));
     
     const matchesSubject = filters.subject === '' || 
-      mentor.expertise.some(skill => skill.toLowerCase().includes(filters.subject.toLowerCase()));
+      (mentor.expertise_areas && mentor.expertise_areas.some(skill => 
+        skill.area.toLowerCase().includes(filters.subject.toLowerCase())));
     
     const matchesAvailability = filters.availability === '' || 
-      mentor.availability.includes(filters.availability);
+      (mentor.availability && mentor.availability.some(slot => 
+        slot.day.toString() === filters.availability));
     
     const matchesRating = filters.rating === '' || 
-      mentor.rating >= parseInt(filters.rating);
+      (mentor.rating && mentor.rating >= parseInt(filters.rating));
     
     return matchesSearch && matchesSubject && matchesAvailability && matchesRating;
   });
@@ -76,6 +78,73 @@ const Search = () => {
       [name]: value
     }));
   };
+  
+  // Open request dialog
+  const handleOpenRequestDialog = (mentor) => {
+    if (!currentUser) {
+      setSnackbar({
+        open: true,
+        message: 'Por favor inicia sesión para solicitar una mentoría',
+        severity: 'warning'
+      });
+      return;
+    }
+    
+    setSelectedMentor(mentor);
+    setRequestDialogOpen(true);
+  };
+  
+  // Close request dialog
+  const handleCloseRequestDialog = () => {
+    setRequestDialogOpen(false);
+  };
+  
+  // Handle successful request
+  const handleRequestSuccess = () => {
+    setSnackbar({
+      open: true,
+      message: '¡Solicitud de mentoría enviada con éxito!',
+      severity: 'success'
+    });
+  };
+  
+  // Map day number to day name
+  const getDayName = (dayNum) => {
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return days[dayNum] || dayNum;
+  };
+  
+  // Format availability for display
+  const formatAvailability = (availability) => {
+    if (!availability || availability.length === 0) return 'No disponible';
+    
+    return availability.map(slot => {
+      return `${getDayName(slot.day)} (${slot.startTime}-${slot.endTime})`;
+    }).join(', ');
+  };
+  
+  // Handle snackbar close
+  const handleCloseSnackbar = () => {
+    setSnackbar({
+      ...snackbar,
+      open: false
+    });
+  };
+  
+  if (loading) {
+    return (
+      <Container maxWidth="lg">
+        <PageHeader 
+          title="Buscar Mentor" 
+          subtitle="Encuentra al mentor ideal para tus necesidades académicas"
+          breadcrumbs={[{ text: 'Buscar Mentor', link: '/search' }]}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
   
   return (
     <Container maxWidth="lg">
@@ -132,11 +201,11 @@ const Search = () => {
                 label="Disponibilidad"
               >
                 <MenuItem value="">Cualquier día</MenuItem>
-                <MenuItem value="Lunes">Lunes</MenuItem>
-                <MenuItem value="Martes">Martes</MenuItem>
-                <MenuItem value="Miércoles">Miércoles</MenuItem>
-                <MenuItem value="Jueves">Jueves</MenuItem>
-                <MenuItem value="Viernes">Viernes</MenuItem>
+                <MenuItem value="1">Lunes</MenuItem>
+                <MenuItem value="2">Martes</MenuItem>
+                <MenuItem value="3">Miércoles</MenuItem>
+                <MenuItem value="4">Jueves</MenuItem>
+                <MenuItem value="5">Viernes</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -160,6 +229,20 @@ const Search = () => {
         </Grid>
       </Paper>
       
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+          <Button 
+            variant="outlined" 
+            size="small" 
+            sx={{ ml: 2 }} 
+            onClick={fetchMentors}
+          >
+            Reintentar
+          </Button>
+        </Alert>
+      )}
+      
       <Box sx={{ mb: 2 }}>
         <Typography variant="h6" component="div">
           {filteredMentors.length} mentores encontrados
@@ -167,74 +250,95 @@ const Search = () => {
       </Box>
       
       <Grid container spacing={3}>
-        {filteredMentors.map(mentor => (
-          <Grid item xs={12} md={4} key={mentor.id}>
-            <Card elevation={2}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar
-                    src={mentor.avatar}
-                    alt={mentor.name}
-                    sx={{ width: 60, height: 60, mr: 2 }}
-                  />
-                  <Box>
-                    <Typography variant="h6" component="div">
-                      {mentor.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Rating value={mentor.rating} precision={0.1} size="small" readOnly />
-                      <Typography variant="body2" sx={{ ml: 1 }}>
-                        ({mentor.rating})
+        {filteredMentors.map(mentor => {
+          // Extract expertise areas from the mentor object
+          const expertiseAreas = mentor.expertise_areas?.map(item => item.area) || [];
+          
+          return (
+            <Grid item xs={12} md={4} key={mentor.id}>
+              <Card elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar
+                      src={mentor.avatar_url}
+                      alt={mentor.name}
+                      sx={{ width: 60, height: 60, mr: 2 }}
+                    >
+                      {mentor.name?.charAt(0)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" component="div">
+                        {mentor.name}
                       </Typography>
+                      {mentor.rating && (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Rating value={mentor.rating} precision={0.1} size="small" readOnly />
+                          <Typography variant="body2" sx={{ ml: 1 }}>
+                            ({mentor.rating})
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
                   </Box>
-                </Box>
-                
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {mentor.bio}
-                </Typography>
-                
-                <Typography variant="subtitle2" gutterBottom>
-                  Áreas de experiencia
-                </Typography>
-                <Box sx={{ mb: 2 }}>
-                  {mentor.expertise.map((skill, index) => (
-                    <Chip
-                      key={index}
-                      label={skill}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      sx={{ mr: 0.5, mb: 0.5 }}
-                    />
-                  ))}
-                </Box>
-                
-                <Divider sx={{ my: 1.5 }} />
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <School fontSize="small" color="action" sx={{ mr: 0.5 }} />
+                  
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {mentor.bio || `Estudiante de ${mentor.career || 'la Universidad'}, ${mentor.semester || ''}° semestre`}
+                  </Typography>
+                  
+                  <Typography variant="subtitle2" gutterBottom>
+                    Áreas de experiencia
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    {expertiseAreas.length > 0 ? (
+                      expertiseAreas.map((skill, index) => (
+                        <Chip
+                          key={index}
+                          label={skill}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          sx={{ mr: 0.5, mb: 0.5 }}
+                        />
+                      ))
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No se especificaron áreas de expertise
+                      </Typography>
+                    )}
+                  </Box>
+                  
+                  <Divider sx={{ my: 1.5 }} />
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <School fontSize="small" color="action" sx={{ mr: 0.5 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {mentor.completed_sessions || 0} sesiones
+                      </Typography>
+                    </Box>
                     <Typography variant="body2" color="text.secondary">
-                      {mentor.sessions} sesiones
+                      {formatAvailability(mentor.availability)}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Disponible: {mentor.availability.join(', ')}
-                  </Typography>
-                </Box>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary" fullWidth>
-                  Ver Perfil
-                </Button>
-                <Button size="small" color="secondary" variant="contained" fullWidth>
-                  Solicitar Mentoría
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
+                </CardContent>
+                <CardActions>
+                  <Button size="small" color="primary" fullWidth>
+                    Ver Perfil
+                  </Button>
+                  <Button 
+                    size="small" 
+                    color="secondary" 
+                    variant="contained" 
+                    fullWidth
+                    onClick={() => handleOpenRequestDialog(mentor)}
+                  >
+                    Solicitar Mentoría
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
       
       {filteredMentors.length === 0 && (
@@ -255,6 +359,32 @@ const Search = () => {
           </Button>
         </Box>
       )}
+      
+      {/* Mentorship Request Dialog */}
+      {selectedMentor && (
+        <MentorshipRequestDialog 
+          open={requestDialogOpen}
+          onClose={handleCloseRequestDialog}
+          mentor={selectedMentor}
+          onSuccess={handleRequestSuccess}
+        />
+      )}
+      
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

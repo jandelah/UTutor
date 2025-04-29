@@ -4,9 +4,11 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider, useAuth } from './AuthContext.jsx';
 
 // Páginas autenticadas
+
 import Dashboard from './pages/Dashboard';
 import Search from './pages/Search';
 import Mentorships from './pages/Mentorships';  // Mantenemos el nombre original del archivo
+import CreateMentorship from './pages/CreateMentorship';
 import Sessions from './pages/Sessions';
 import Resources from './pages/Resources';
 import ResourceUpload from './pages/ResourceUpload';
@@ -50,6 +52,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Layout><Mentorships /></Layout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/tutoring/create" 
+        element={
+          <ProtectedRoute>
+            <Layout><CreateMentorship /></Layout>
           </ProtectedRoute>
         } 
       />

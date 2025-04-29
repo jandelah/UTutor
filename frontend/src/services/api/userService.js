@@ -1,84 +1,76 @@
-import { MOCK_USERS, MOCK_MENTOR_PROFILES, MOCK_MENTEE_PROFILES } from '../mockData';
+// src/services/api/userService.js
 
-// Simular delay para emular peticiones a API
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+import apiClient from './apiClient';
 
 // Get all users
 export const getUsers = async () => {
-  await delay(500);
-  return MOCK_USERS;
+  try {
+    const response = await apiClient.get('/users');
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
 };
 
 // Get user by ID
 export const getUserById = async (userId) => {
-  await delay(300);
-  const user = MOCK_USERS.find(user => user.id === parseInt(userId));
-  
-  if (!user) {
-    throw new Error('Usuario no encontrado');
+  try {
+    const response = await apiClient.get(`/users/${userId}`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
   }
-  
-  return user;
 };
 
-// Get mentor profile by user ID
-export const getMentorProfileByUserId = async (userId) => {
-  await delay(400);
-  const profile = MOCK_MENTOR_PROFILES.find(profile => profile.userId === parseInt(userId));
-  
-  if (!profile) {
-    throw new Error('Perfil de mentor no encontrado');
+// Get current user's profile
+export const getCurrentUser = async () => {
+  try {
+    const response = await apiClient.get('/users/me');
+    return response.data.user;
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    throw error;
   }
-  
-  return profile;
 };
 
-// Get mentee profile by user ID
-export const getMenteeProfileByUserId = async (userId) => {
-  await delay(400);
-  const profile = MOCK_MENTEE_PROFILES.find(profile => profile.userId === parseInt(userId));
-  
-  if (!profile) {
-    throw new Error('Perfil de mentee no encontrado');
+// Get mentors (users with role TUTOR)
+export const getMentors = async () => {
+  try {
+    // This endpoint might need to be adjusted based on your actual API
+    // It assumes there's a way to filter users by role
+    const response = await apiClient.get('/users?role=TUTOR');
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Error fetching mentors:', error);
+    throw error;
   }
-  
-  return profile;
 };
 
-// Get all mentors with their profiles
-export const getMentorsWithProfiles = async () => {
-  await delay(600);
-  const mentors = MOCK_USERS.filter(user => user.role === 'MENTOR');
-  
-  return Promise.all(mentors.map(async mentor => {
-    const profile = await getMentorProfileByUserId(mentor.id).catch(() => null);
-    return { ...mentor, profile };
-  }));
+// Get mentees (users with role TUTORADO)
+export const getMentees = async () => {
+  try {
+    // Filter users who are tutorados
+    const response = await apiClient.get('/users?role=TUTORADO');
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Error fetching mentees:', error);
+    throw error;
+  }
 };
 
-// Get all mentees with their profiles
+// Get mentees with their profiles
 export const getMenteesWithProfiles = async () => {
-  await delay(600);
-  const mentees = MOCK_USERS.filter(user => user.role === 'MENTEE');
-  
-  return Promise.all(mentees.map(async mentee => {
-    const profile = await getMenteeProfileByUserId(mentee.id).catch(() => null);
-    return { ...mentee, profile };
-  }));
-};
-
-// Mock login (simplemente verifica si el email existe)
-export const loginUser = async (email, password) => {
-  await delay(800);
-  const user = MOCK_USERS.find(user => user.email === email);
-  
-  if (!user) {
-    throw new Error('Credenciales inválidas');
+  try {
+    // Get mentees
+    const mentees = await getMentees();
+    
+    // In a real implementation, you might want to fetch their profiles
+    // This would depend on your API structure
+    return mentees;
+  } catch (error) {
+    console.error('Error fetching mentees with profiles:', error);
+    throw error;
   }
-  
-  // En un caso real, esta función verificaría la contraseña con el backend
-  return {
-    user,
-    token: 'mock-jwt-token-' + Date.now()
-  };
 };

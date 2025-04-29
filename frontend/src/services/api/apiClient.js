@@ -2,67 +2,92 @@
 
 import axios from 'axios';
 
-const API_URL = 'https://ututor-api.onrender.com';
+// Get the API URL from environment or use fallback
+const API_URL = import.meta.env.VITE_API_URL || 'https://ututor-api.onrender.com';
 
+// Create axios instance with default config
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  },
-  // Don't transform the response - we'll handle it manually in our code
-  transformResponse: [(data) => {
-    // Keep the original response data
-    return data;
-  }]
+  }
 });
 
-// Add token to requests if available
+// Request interceptor to add token and handle logging
 apiClient.interceptors.request.use(
   (config) => {
     // Log the request in development
-    if (process.env.NODE_ENV !== 'production') {
+    if (import.meta.env.DEV) {
       console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, config.data);
     }
     
+    // Get token from localStorage and add to headers if available
     const token = localStorage.getItem('token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {
-    console.error('Request error:', error);
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
-// Process responses
+// Response interceptor to handle common errors and parse data
 apiClient.interceptors.response.use(
   (response) => {
-    // For successful responses, parse JSON if it's a string
-    if (typeof response.data === 'string' && response.data.trim()) {
-      try {
-        response.data = JSON.parse(response.data);
-      } catch (e) {
-        console.warn('Failed to parse response as JSON:', e);
-      }
+    // Log the response in development
+    if (import.meta.env.DEV) {
+      console.log(`API Response (${response.status}):`, response.data);
     }
     
-    // Log the response in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`API Response: ${response.status}`, response.data);
+    // Transform response based on structure to ensure consistency
+    // This helps handle various API response formats
+    if (response.data && (response.data.success !== undefined)) {
+      // API follows {success: true, data: ...} pattern
+      if (!response.data.success) {
+        // API indicates failure - convert to error for consistent handling
+        return Promise.reject({
+          response: {
+            status: response.status,
+            data: response.data
+          }
+        });
+      }
     }
     
     return response;
   },
-  (error) => {
-    // For errors, add more context and better logging
+  async (error) => {
+    // Handle different error scenarios
     if (error.response) {
-      // The request was made and the server responded with an error status
-      console.error(`API Error ${error.response.status}:`, error.response.data);
+      // The request was made and the server responded with an error code
+      const status = error.response.status;
+      const errorData = error.response.data;
+
+      if (import.meta.env.DEV) {
+        console.error(`API Error ${status}:`, errorData);
+      }
+      
+      // Handle unauthorized errors (401)
+      if (status === 401) {
+        // Clear token as it's invalid
+        localStorage.removeItem('token');
+        
+        // Redirect to login (when not already on login page)
+        if (window.location.pathname !== '/login') {
+          // Store the current location to redirect back after login
+          localStorage.setItem('redirectAfterLogin', window.location.pathname);
+          window.location.href = '/login?session=expired';
+        }
+      }
     } else if (error.request) {
-      // The request was made but no response was received
-      console.error('Network Error (no response):', error.request);
+      // The request was made but no response was received (network error)
+      console.error('Network Error:', error.request);
+      
+      // For better UX, we could add offline detection/handling here
     } else {
       // Something happened in setting up the request
       console.error('Request Error:', error.message);
