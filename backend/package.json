@@ -1,4 +1,5 @@
 {
+  "name": "ututor-backend",
   "version": "1.0.0",
   "description": "Backend API for UTutor mentoring platform",
   "main": "server.js",
@@ -24,7 +25,6 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
     "nodemon": "^3.0.1"
   },
   "engines": {
